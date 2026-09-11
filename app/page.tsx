@@ -1,16 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StatsCounter from '@/components/StatsCounter';
 import TiltCard from '@/components/TiltCard';
 import MagneticButton from '@/components/MagneticButton';
 import Scene from '@/components/Scene';
 import LoadingScreen from '@/components/LoadingScreen';
+import { getSpotlight, getFacultyAdvisor } from '@/lib/firestore';
+import { INITIAL_SPOTLIGHT, INITIAL_ADVISOR } from '@/lib/seedData';
+import { SpotlightData, FacultyAdvisorData } from '@/lib/types';
 
 export default function HomePage() {
   const [animationLoaded, setAnimationLoaded] = useState(false);
   const [orbOffset, setOrbOffset] = useState({ x: 0, y: 0 });
+  const [spotlight, setSpotlight] = useState<SpotlightData>(INITIAL_SPOTLIGHT);
+  const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
+
+  useEffect(() => {
+    getSpotlight().then(setSpotlight);
+    getFacultyAdvisor().then(setAdvisor);
+  }, []);
 
   const stats = [
     { end: 120, suffix: '+', label: 'Active members' },
@@ -150,16 +160,18 @@ export default function HomePage() {
 
           <div className="feature" style={{ marginTop: '42px' }}>
             <img
-              src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1800&q=82"
-              alt="Students collaborating at an event"
+              src={spotlight.image}
+              alt={spotlight.title}
             />
             <div className="feature-overlay">
-              <div className="date-chip">Flagship Series · 2026</div>
-              <h3>Annual Tech Talk & Hackathon Series</h3>
-              <p>
-                Bringing leading tech practitioners, researchers, and alumni together for practical keynotes,
-                live coding demos, and project showcases.
-              </p>
+              <div className="date-chip">{spotlight.tag}</div>
+              <h3>{spotlight.title}</h3>
+              <p>{spotlight.description}</p>
+              {spotlight.link && (
+                <Link href={spotlight.link} className="link-arrow" style={{ marginTop: '12px', display: 'inline-block' }}>
+                  Explore Spotlight →
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -219,13 +231,21 @@ export default function HomePage() {
           </div>
 
           <div className="surface advisor">
-            <div className="advisor-photo">FA</div>
+            {advisor.image ? (
+              <img
+                src={advisor.image}
+                alt={advisor.name}
+                className="advisor-photo"
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              <div className="advisor-photo">{advisor.initials || 'FA'}</div>
+            )}
             <div>
-              <div className="eyebrow mono">Faculty Advisor</div>
-              <h3 style={{ fontSize: '30px' }}>Dr. / Senior Lecturer</h3>
+              <div className="eyebrow mono">{advisor.title}</div>
+              <h3 style={{ fontSize: '30px' }}>{advisor.name}</h3>
               <p style={{ marginTop: '10px' }}>
-                Department of Computing and Information Systems, Faculty of Applied Sciences,
-                Sabaragamuwa University of Sri Lanka. Mentoring student leaders in academic and technical excellence.
+                {advisor.department}. {advisor.bio}
               </p>
               <Link href="/leadership" className="link-arrow" style={{ marginTop: '14px' }}>
                 View Full Executive Committee →

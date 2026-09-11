@@ -25,6 +25,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Do not show the common header on the admin dashboard
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },

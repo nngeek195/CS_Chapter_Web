@@ -1,8 +1,23 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import TypographyVortexCanvas from '@/components/TypographyVortexCanvas';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/admin')) {
+    return (
+      <footer style={{ borderTop: '1px solid var(--line)', padding: '20px 0', textAlign: 'center', fontSize: '13px', color: 'var(--muted)', background: 'var(--paper)' }}>
+        <div className="container">
+          IEEE Computer Society SUSL · Chapter Administration Portal
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer>
       {/* Background Typography Vortex animation with low opacity */}
@@ -50,6 +65,7 @@ export default function Footer() {
             <Link href="/membership">Membership</Link>
             <Link href="/resources">Resources</Link>
             <Link href="/contact">Contact</Link>
+            <Link href="/admin">Portal Login</Link>
           </div>
 
           <div>

@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Site settings (Spotlight, Faculty Advisor)
+    match /site_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Event Categories
+    match /event_categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Events Archive
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Active Executive Committee
+    match /leadership/{memberId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Past Committees (Alumni Contributions)
+    match /past_committees/{committeeId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Curated Resources
+    match /resources/{resourceId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Photo Gallery
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Default fallback for any other collections
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

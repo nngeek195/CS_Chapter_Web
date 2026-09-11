@@ -1,51 +1,27 @@
-import React from 'react';
-import type { Metadata } from 'next';
-import TiltCard from '@/components/TiltCard';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Resources',
-  description: 'Technical learning materials, workshop recordings, competition kits, and research guides.',
-};
+import React, { useState, useEffect } from 'react';
+import TiltCard from '@/components/TiltCard';
+import { getResources } from '@/lib/firestore';
+import { INITIAL_RESOURCES } from '@/lib/seedData';
+import { ResourceItem } from '@/lib/types';
 
 export default function ResourcesPage() {
-  const resources = [
-    {
-      category: 'Workshop Kit',
-      title: 'Full-Stack Web Development Handbook',
-      description: 'Modern guide covering Next.js, TypeScript, REST & GraphQL APIs, and Docker deployments.',
-      link: '#',
-    },
-    {
-      category: 'IEEEXtreme Prep',
-      title: 'Competitive Programming Cheat Sheet',
-      description: 'Data structures, graph algorithms, dynamic programming templates, and practice problem sets.',
-      link: '#',
-    },
-    {
-      category: 'AI & Data Science',
-      title: 'Machine Learning Fundamentals & PyTorch',
-      description: 'Introductory notebook collection covering supervised learning, neural networks, and model evaluation.',
-      link: '#',
-    },
-    {
-      category: 'Research',
-      title: 'IEEE Research Paper Writing Guide',
-      description: 'LaTeX templates, citation standards, writing abstracts, and submitting to IEEE conferences.',
-      link: '#',
-    },
-    {
-      category: 'Open Source',
-      title: 'Git & GitHub Workflow for Teams',
-      description: 'Branching strategies, pull request etiquette, continuous integration, and collaborative development.',
-      link: '#',
-    },
-    {
-      category: 'Cloud & DevOps',
-      title: 'Cloud Architecture & Microservices',
-      description: 'Introduction to containerization, serverless functions, and deploying resilient cloud applications.',
-      link: '#',
-    },
-  ];
+  const [resources, setResources] = useState<ResourceItem[]>(INITIAL_RESOURCES);
+  const [showAll, setShowAll] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getResources()
+      .then((res) => {
+        if (res && res.length > 0) setResources(res);
+      })
+      .catch((err) => console.warn('Resources fetch fallback:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const displayedResources = showAll ? resources : resources.slice(0, 6);
+  const hasMore = resources.length > 6;
 
   return (
     <>
@@ -67,22 +43,48 @@ export default function ResourcesPage() {
           <div className="eyebrow mono">Curated Materials</div>
           <h2 className="section-title">Knowledge repository.</h2>
 
-          <div className="resource-grid" style={{ marginTop: '38px' }}>
-            {resources.map((item, idx) => (
-              <TiltCard key={idx} className="resource">
-                <div className="resource-thumb">
-                  <span>{item.category}</span>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <div className="spinner"></div>
+            </div>
+          ) : (
+            <>
+              <div className="resource-grid" style={{ marginTop: '38px' }}>
+                {displayedResources.map((item) => (
+                  <TiltCard key={item.id} className="resource">
+                    <div className="resource-thumb">
+                      <span>{item.category}</span>
+                    </div>
+                    <div className="resource-body">
+                      <h3>{item.title}</h3>
+                      <p style={{ marginTop: '10px' }}>{item.description}</p>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-arrow"
+                        style={{ marginTop: '16px', display: 'inline-block' }}
+                      >
+                        Access Resource ↗
+                      </a>
+                    </div>
+                  </TiltCard>
+                ))}
+              </div>
+
+              {hasMore && (
+                <div style={{ textAlign: 'center', marginTop: '36px' }}>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    onClick={() => setShowAll(!showAll)}
+                  >
+                    {showAll ? 'Show Less ↑' : `Explore More Resources (${resources.length - 6} more) ↓`}
+                  </button>
                 </div>
-                <div className="resource-body">
-                  <h3>{item.title}</h3>
-                  <p style={{ marginTop: '10px' }}>{item.description}</p>
-                  <a href={item.link} className="link-arrow" style={{ marginTop: '16px' }}>
-                    Access Resource ↗
-                  </a>
-                </div>
-              </TiltCard>
-            ))}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -99,22 +101,13 @@ export default function ResourcesPage() {
           </div>
 
           <div className="surface card">
-            <h3>Student Member Perks</h3>
-            <ul style={{ marginTop: '16px', paddingLeft: '20px', lineHeight: 1.8, color: 'var(--muted)' }}>
-              <li>Free access to Computer.org digital magazine & articles</li>
-              <li>Discounts on IEEE certifications (Cybersecurity, Software Engineering)</li>
-              <li>Free @ieee.org professional email alias</li>
-              <li>Eligibility for international travel grants and scholarships</li>
+            <h3>Member Benefit Highlights</h3>
+            <ul style={{ marginTop: '14px', paddingLeft: '20px', lineHeight: 1.8 }}>
+              <li>Access to IEEE Computer Society Digital Library (CSDL)</li>
+              <li>Subscription to <em>Computer</em> flagship magazine</li>
+              <li>Free access to over 3,000 online training courses</li>
+              <li>Student discounts for top IEEE technical conferences</li>
             </ul>
-            <a
-              href="https://www.computer.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-arrow"
-              style={{ marginTop: '20px' }}
-            >
-              Explore Computer.org ↗
-            </a>
           </div>
         </div>
       </section>

@@ -1,45 +1,27 @@
-import React from 'react';
-import type { Metadata } from 'next';
-import GalleryLightbox from '@/components/GalleryLightbox';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Gallery',
-  description: 'Photo highlights and moments from IEEE CS SUSL events, workshops, and hackathons.',
-};
+import React, { useState, useEffect } from 'react';
+import GalleryLightbox from '@/components/GalleryLightbox';
+import { getGalleryPhotos } from '@/lib/firestore';
+import { INITIAL_GALLERY } from '@/lib/seedData';
+import { GalleryPhoto } from '@/lib/types';
 
 export default function GalleryPage() {
-  const photos = [
-    {
-      src: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Students collaborating during technical workshop',
-      caption: 'Collaborative Problem Solving Session',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Hands-on coding lab at Sabaragamuwa University',
-      caption: 'Hands-on Coding Lab',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Tech Talk keynote presentation',
-      caption: 'Guest Speaker Keynote & Discussion',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Hackathon team sprinting through the night',
-      caption: 'IEEEXtreme Hackathon Team Sprint',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Chapter annual showcase and awards',
-      caption: 'Annual Chapter Showcase & Awards',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=82',
-      alt: 'Workshop participants sharing demo code',
-      caption: 'Participant Demo & Knowledge Exchange',
-    },
-  ];
+  const [photos, setPhotos] = useState<GalleryPhoto[]>(INITIAL_GALLERY);
+  const [showAll, setShowAll] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getGalleryPhotos()
+      .then((items) => {
+        if (items && items.length > 0) setPhotos(items);
+      })
+      .catch((err) => console.warn('Gallery fetch fallback:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const displayedPhotos = showAll ? photos : photos.slice(0, 6);
+  const hasMore = photos.length > 6;
 
   return (
     <>
@@ -62,7 +44,27 @@ export default function GalleryPage() {
             Capturing the journey.
           </h2>
 
-          <GalleryLightbox photos={photos} />
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <div className="spinner"></div>
+            </div>
+          ) : (
+            <>
+              <GalleryLightbox photos={displayedPhotos} />
+
+              {hasMore && (
+                <div style={{ textAlign: 'center', marginTop: '36px' }}>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    onClick={() => setShowAll(!showAll)}
+                  >
+                    {showAll ? 'Show Less ↑' : `Explore More Moments (${photos.length - 6} more) ↓`}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
     </>
