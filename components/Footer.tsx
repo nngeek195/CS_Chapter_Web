@@ -1,9 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
+import TypographyVortexCanvas from '@/components/TypographyVortexCanvas';
 
 export default function Footer() {
   return (
     <footer>
+      {/* Background Typography Vortex animation with low opacity */}
+      <div className="footer-bg-vortex" aria-hidden="true">
+        <TypographyVortexCanvas
+          phrase="IEEE CS CHAPTER | SUSL / "
+          mode="dark"
+          speed={0.8}
+          ringGrowth={1.21}
+          opacity={0.35}
+          dissolveRadius={1.2}
+          particleAmount={1.1}
+          background="transparent"
+          showHint={false}
+        />
+      </div>
+
       <div className="container">
         <div className="footer-grid">
           <div>
@@ -45,6 +61,7 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Restored IEEE CS Chapter Mark */}
         <div className="footer-mark">IEEE CS</div>
 
         <div className="footer-bottom">

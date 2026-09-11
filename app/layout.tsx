@@ -45,9 +45,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                if (localStorage.getItem('ieeecs-theme') === 'dark') {
-                  document.body.classList.add('dark');
-                }
+                localStorage.removeItem('ieeecs-theme');
               } catch (e) {}
             `,
           }}

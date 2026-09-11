@@ -7,18 +7,14 @@ import { usePathname } from 'next/navigation';
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    // Theme initialization
-    const savedTheme = localStorage.getItem('ieeecs-theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark');
-      setIsDark(true);
-    } else {
-      setIsDark(document.body.classList.contains('dark'));
-    }
+    // Clear any previously stored dark theme
+    try {
+      document.body.classList.remove('dark');
+      localStorage.removeItem('ieeecs-theme');
+    } catch (e) {}
 
     // Scroll listener
     const handleScroll = () => {
@@ -28,18 +24,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.body.classList.add('dark');
-      localStorage.setItem('ieeecs-theme', 'dark');
-    } else {
-      document.body.classList.remove('dark');
-      localStorage.setItem('ieeecs-theme', 'light');
-    }
-  };
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -81,14 +65,6 @@ export default function Navbar() {
           </nav>
 
           <div className="nav-actions">
-            <button
-              className="icon-btn"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              title="Toggle theme"
-            >
-              {isDark ? '☼' : '◐'}
-            </button>
             <button
               className="menu-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
