@@ -1,11 +1,17 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import StatsCounter from '@/components/StatsCounter';
 import TiltCard from '@/components/TiltCard';
 import MagneticButton from '@/components/MagneticButton';
-import WaterHeroOrb from '@/components/WaterHeroOrb';
+import Scene from '@/components/Scene';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function HomePage() {
+  const [animationLoaded, setAnimationLoaded] = useState(false);
+  const [orbOffset, setOrbOffset] = useState({ x: 0, y: 0 });
+
   const stats = [
     { end: 120, suffix: '+', label: 'Active members' },
     { end: 24, suffix: '+', label: 'Events & sessions' },
@@ -13,15 +19,39 @@ export default function HomePage() {
     { end: 12, suffix: '+', label: 'Workshops delivered' },
   ];
 
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 35;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 25;
+    setOrbOffset({ x, y });
+  };
+
+  const handleHeroMouseLeave = () => {
+    setOrbOffset({ x: 0, y: 0 });
+  };
+
   return (
     <>
+      {/* Chapter Animation Loading Bar Screen */}
+      <LoadingScreen isLoaded={animationLoaded} />
+
       {/* Hero Section */}
-      <section className="hero">
-        {/* Floating Water Orb Background with Centered Bigger Logo & WebGL2 Water Simulation */}
-        <WaterHeroOrb />
+      <section
+        className="hero hero-centered"
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={handleHeroMouseLeave}
+      >
+        {/* ThreeUI ConstellationField Background Animation */}
+        <Scene onLoaded={() => setAnimationLoaded(true)} />
+        <div
+          className="hero-orb"
+          style={{
+            transform: `translate(calc(-50% + ${orbOffset.x}px), calc(-50% + ${orbOffset.y}px))`,
+          }}
+        ></div>
 
         <div className="container" style={{ position: 'relative', zIndex: 10 }}>
-          <div className="hero-copy">
+          <div className="hero-copy hero-copy-centered">
             <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
               SABARAGAMUWA UNIVERSITY OF SRI LANKA
             </div>

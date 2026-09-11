@@ -346,6 +346,140 @@ body.dark .mobile-brand .brand-logo {
   max-width: 850px;
 }
 
+/* Boot Loading Screen & Progress Bar */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #06131d;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.65s var(--ease), visibility 0.65s var(--ease);
+}
+
+#boot.done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.boot-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1.7px solid rgba(255, 255, 255, 0.75);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 12px rgba(0, 98, 155, 0.35);
+}
+
+.boot-mark:after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(135deg, var(--blue), var(--orange));
+  clip-path: polygon(0 0, 100% 40%, 42% 100%);
+}
+
+.boot-rail {
+  width: min(240px, 36vw);
+  height: 3px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.boot-rail i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue), var(--orange));
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(0, 98, 155, 0.7);
+  transition: width 0.08s ease-out;
+}
+
+.boot-num {
+  min-width: 36px;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: monospace, "Open Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ThreeUI Shader Frame Background */
+.shader-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.shader-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: none;
+}
+
+/* Centered Landing Page Hero Context */
+.hero.hero-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+}
+
+.hero.hero-centered .hero-orb {
+  left: 50%;
+  right: auto;
+  top: 36%;
+  transform: translate(-50%, -50%);
+  width: min(52vw, 660px);
+  opacity: 0.45;
+  filter: blur(8px);
+}
+
+.hero-copy-centered {
+  margin: 0 auto;
+  text-align: center;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-copy-centered h1 {
+  max-width: 16ch;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-copy-centered .lead {
+  margin: 28px auto 0;
+  max-width: 66ch;
+  text-align: center;
+}
+
+.hero-copy-centered .hero-ctas {
+  justify-content: center;
+  margin-top: 38px;
+}
+
 .hero h1, .page-hero h1 {
   font-size: clamp(54px, 8vw, 112px);
   line-height: 0.96;
