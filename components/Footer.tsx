@@ -70,9 +70,9 @@ export default function Footer() {
 
           <div>
             <h4>Connect</h4>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href="https://www.linkedin.com/company/ieee-cs-student-branch-chapter-susl" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://www.instagram.com/ieee_cs_susl?stkn=MWx2d2k4Y2FkaHU2eQ==" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.facebook.com/share/1Fgqg7JcxD/" target="_blank" rel="noopener noreferrer">Facebook</a>
             <a href="mailto:ieeecs@sab.ac.lk">ieeecs@sab.ac.lk</a>
           </div>
         </div>
