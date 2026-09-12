@@ -501,6 +501,19 @@ footer .brand-logo {
   margin-top: 38px;
 }
 
+.cs-membership {
+  position: relative;
+  z-index: 9999;
+  margin-top: 20px;
+  margin-bottom: -40px;
+}
+
+.cs-membership a {
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto !important;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
