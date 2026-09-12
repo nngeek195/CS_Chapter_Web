@@ -46,6 +46,16 @@ export default function MembershipPage() {
             A clear pathway: Join IEEE → Add Computer Society membership → Engage in SUSL chapter activities
             and leadership.
           </p>
+          <div className="cs-membership">
+            <a
+              href="https://www.ieee.org/membership-catalog/productdetail/showProductDetailPage.html?product=MEMC016"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn primary"
+            >
+              Secure the Membership
+            </a>
+          </div>
         </div>
       </section>
 

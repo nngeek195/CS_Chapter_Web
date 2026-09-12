@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import TypographyVortexCanvas from '@/components/TypographyVortexCanvas';
+import Logo from '../images/logo.png';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -40,11 +41,10 @@ export default function Footer() {
           <div>
             <Link href="/" className="brand" aria-label="IEEE CS SUSL Chapter Home">
               <img
-                src="/images/logo.png"
+                src={Logo.src}
                 alt="IEEE Computer Society SUSL Logo"
                 className="brand-logo"
               />
-              <span className="brand-name">IEEE CS · SUSL</span>
             </Link>
             <p style={{ marginTop: '18px', maxWidth: '34ch' }}>
               A professional chapter platform for technical learning, coding culture,
@@ -81,8 +81,8 @@ export default function Footer() {
         <div className="footer-mark">IEEE CS</div>
 
         <div className="footer-bottom">
-          <span>IEEE Computer Society Chapter · Sabaragamuwa University of Sri Lanka</span>
-          <span>© {new Date().getFullYear()} Chapter Website</span>
+          <span>IEEE Computer Society Chapter <br /> Sabaragamuwa University of Sri Lanka</span>
+          <span>© {new Date().getFullYear()} IEEE Computer Society Chapter </span>
         </div>
       </div>
     </footer>
