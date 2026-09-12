@@ -62,7 +62,7 @@ export default function HomePage() {
 
         <div className="container" style={{ position: 'relative', zIndex: 10 }}>
           <div className="hero-copy hero-copy-centered">
-            <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
+            <div className="eyebrow mono" style={{ color: 'white' }}>
               SABARAGAMUWA UNIVERSITY OF SRI LANKA
             </div>
             <h1>
