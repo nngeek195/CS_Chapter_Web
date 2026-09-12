@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Logo from '../images/logo.png';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -47,11 +48,10 @@ export default function Navbar() {
         <div className="container nav-inner">
           <Link href="/" className="brand" aria-label="IEEE CS SUSL Chapter Home">
             <img
-              src="/images/logo.png"
+              src={Logo.src}
               alt="IEEE Computer Society SUSL Logo"
               className="brand-logo"
             />
-            <span className="brand-name">IEEE CS · SUSL</span>
           </Link>
 
           <nav className="nav-links">

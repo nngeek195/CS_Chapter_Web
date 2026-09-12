@@ -183,7 +183,7 @@ export default function HomePage() {
           <div className="eyebrow mono">Why join IEEE CS</div>
           <h2 className="section-title">More than a membership badge.</h2>
           <div className="grid g3" style={{ marginTop: '46px' }}>
-            <TiltCard>
+            <TiltCard className="titlecard">
               <div className="card-icon">01</div>
               <h3>Learn by doing</h3>
               <p>
@@ -192,7 +192,7 @@ export default function HomePage() {
               </p>
             </TiltCard>
 
-            <TiltCard>
+            <TiltCard className="titlecard">
               <div className="card-icon">02</div>
               <h3>Meet the ecosystem</h3>
               <p>
@@ -201,7 +201,7 @@ export default function HomePage() {
               </p>
             </TiltCard>
 
-            <TiltCard>
+            <TiltCard className="titlecard">
               <div className="card-icon">03</div>
               <h3>Open the next door</h3>
               <p>
