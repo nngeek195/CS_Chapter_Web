@@ -28,7 +28,7 @@ export default function Footer() {
           mode="dark"
           speed={0.8}
           ringGrowth={1.21}
-          opacity={0.35}
+          opacity={0.5}
           dissolveRadius={1.2}
           particleAmount={1.1}
           background="transparent"
