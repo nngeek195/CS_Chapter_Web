@@ -21,6 +21,7 @@ import {
   PastCommittee,
   ResourceItem,
   GalleryPhoto,
+  ContactMessage,
 } from './types';
 import {
   INITIAL_SPOTLIGHT,
@@ -294,3 +295,42 @@ export async function createGalleryPhoto(photo: Omit<GalleryPhoto, 'id'>): Promi
 export async function deleteGalleryPhoto(id: string): Promise<void> {
   await deleteDoc(doc(db, 'gallery', id));
 }
+
+// ==========================================
+// CONTACT MESSAGES
+// ==========================================
+export async function submitContactMessage(
+  data: Omit<ContactMessage, 'id' | 'createdAt' | 'read'>
+): Promise<ContactMessage> {
+  const col = collection(db, 'contact_messages');
+  const payload = {
+    ...data,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+  const ref = await addDoc(col, payload);
+  return { id: ref.id, ...payload };
+}
+
+export async function getContactMessages(): Promise<ContactMessage[]> {
+  try {
+    const snap = await getDocs(collection(db, 'contact_messages'));
+    if (!snap.empty) {
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() } as ContactMessage));
+      return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  } catch (err) {
+    console.warn('Firestore contact messages fetch:', err);
+  }
+  return [];
+}
+
+export async function markContactMessageAsRead(id: string, read: boolean): Promise<void> {
+  const ref = doc(db, 'contact_messages', id);
+  await updateDoc(ref, { read });
+}
+
+export async function deleteContactMessage(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'contact_messages', id));
+}
+

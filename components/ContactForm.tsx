@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { submitContactMessage } from '@/lib/firestore';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -10,16 +11,32 @@ export default function ContactForm() {
     message: '',
   });
   const [status, setStatus] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setStatus('Thank you! Your message has been sent. We will get back to you shortly.');
-      setIsSubmitting(false);
+    setStatus(null);
+    setIsError(false);
+
+    try {
+      await submitContactMessage({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      });
+      setStatus('Thank you! Your message has been sent to chapter leadership. We will get back to you shortly.');
+      setIsError(false);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 600);
+    } catch (err: any) {
+      console.error('Contact submit error:', err);
+      setStatus(err?.message || 'Failed to send your message. Please try again or email us directly.');
+      setIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -86,12 +103,14 @@ export default function ContactForm() {
             marginTop: '16px',
             padding: '12px 16px',
             borderRadius: '10px',
-            background: 'rgba(0, 98, 155, 0.1)',
-            color: 'var(--blue)',
+            background: isError ? 'rgba(220, 38, 38, 0.1)' : 'rgba(0, 98, 155, 0.1)',
+            color: isError ? '#dc2626' : 'var(--blue)',
+            border: isError ? '1px solid rgba(220, 38, 38, 0.3)' : '1px solid rgba(0, 98, 155, 0.25)',
             fontSize: '13px',
             fontWeight: 600,
           }}
         >
+          {isError ? '⚠️ ' : '✅ '}
           {status}
         </div>
       )}

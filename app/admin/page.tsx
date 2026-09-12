@@ -14,6 +14,7 @@ import {
   PastCommittee,
   ResourceItem,
   GalleryPhoto,
+  ContactMessage,
 } from '@/lib/types';
 import {
   getSpotlight,
@@ -42,10 +43,13 @@ import {
   getGalleryPhotos,
   createGalleryPhoto,
   deleteGalleryPhoto,
+  getContactMessages,
+  markContactMessageAsRead,
+  deleteContactMessage,
 } from '@/lib/firestore';
 import { seedAllData } from '@/lib/seedData';
 
-type Tab = 'spotlight' | 'advisor' | 'events' | 'leadership' | 'resources' | 'gallery';
+type Tab = 'spotlight' | 'advisor' | 'events' | 'leadership' | 'resources' | 'gallery' | 'messages';
 
 const BATCH_OPTIONS = [
   '2021/2022 Batch',
@@ -73,6 +77,9 @@ export default function AdminDashboardPage() {
   const [pastCommittees, setPastCommittees] = useState<PastCommittee[]>([]);
   const [resources, setResources] = useState<ResourceItem[]>([]);
   const [gallery, setGallery] = useState<GalleryPhoto[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [messageFilter, setMessageFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [messageSearch, setMessageSearch] = useState('');
 
   // Forms / Modals
   const [newCatKey, setNewCatKey] = useState('');
@@ -140,6 +147,7 @@ export default function AdminDashboardPage() {
         pastData,
         resourcesData,
         galleryData,
+        messagesData,
       ] = await Promise.all([
         getSpotlight(),
         getFacultyAdvisor(),
@@ -149,6 +157,7 @@ export default function AdminDashboardPage() {
         getPastCommittees(),
         getResources(),
         getGalleryPhotos(),
+        getContactMessages(),
       ]);
 
       setSpotlight(spotlightData);
@@ -159,6 +168,7 @@ export default function AdminDashboardPage() {
       setPastCommittees(pastData);
       setResources(resourcesData);
       setGallery(galleryData);
+      setMessages(messagesData);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
     } finally {
@@ -484,6 +494,30 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // 8. Contact Inquiries Actions
+  const handleToggleMessageRead = async (id: string, currentRead: boolean | undefined) => {
+    try {
+      await markContactMessageAsRead(id, !currentRead);
+      setMessages(
+        messages.map((m) => (m.id === id ? { ...m, read: !currentRead } : m))
+      );
+      showToast(!currentRead ? 'Inquiry marked as read' : 'Inquiry marked as unread');
+    } catch (err: any) {
+      alert('Error updating inquiry: ' + err.message);
+    }
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    if (!confirm('Are you sure you want to permanently delete this contact inquiry?')) return;
+    try {
+      await deleteContactMessage(id);
+      setMessages(messages.filter((m) => m.id !== id));
+      showToast('Inquiry deleted.');
+    } catch (err: any) {
+      alert('Error deleting inquiry: ' + err.message);
+    }
+  };
+
   // Seed Handler
   const handleSeed = async () => {
     if (!confirm('Seed all default initial data into Firestore? This will populate events, leadership, advisor, resources, and gallery.')) return;
@@ -566,6 +600,24 @@ export default function AdminDashboardPage() {
             </button>
             <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>
               🖼️ Gallery ({gallery.length})
+            </button>
+            <button className={`admin-tab ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => setActiveTab('messages')}>
+              📬 Inquiries ({messages.length})
+              {messages.filter((m) => !m.read).length > 0 && (
+                <span
+                  style={{
+                    marginLeft: '6px',
+                    background: '#dc2626',
+                    color: '#fff',
+                    borderRadius: '999px',
+                    padding: '1px 7px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                  }}
+                >
+                  {messages.filter((m) => !m.read).length} new
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -1383,6 +1435,209 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 7: INQUIRIES & CONTACT MESSAGES */}
+        {/* ==================================================== */}
+        {activeTab === 'messages' && (
+          <div className="admin-panel">
+            <div className="admin-panel-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h2>Contact Inquiries ({messages.length})</h2>
+                <p>Messages received from students, researchers, faculty, and partners through the Contact Us form.</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600 }}>
+                  {messages.filter((m) => !m.read).length} Unread
+                </span>
+                <span style={{ background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '6px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600 }}>
+                  {messages.length} Total
+                </span>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              <input
+                type="text"
+                placeholder="Search by sender name, email, or subject..."
+                value={messageSearch}
+                onChange={(e) => setMessageSearch(e.target.value)}
+                style={{ flex: 1, minWidth: '240px', padding: '10px 16px', borderRadius: '10px', border: '1px solid var(--line)', background: 'var(--paper)' }}
+              />
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {(['all', 'unread', 'read'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setMessageFilter(f)}
+                    className="btn secondary"
+                    style={{
+                      fontSize: '12px',
+                      padding: '8px 16px',
+                      textTransform: 'capitalize',
+                      background: messageFilter === f ? 'var(--blue)' : undefined,
+                      color: messageFilter === f ? '#fff' : undefined,
+                      borderColor: messageFilter === f ? 'var(--blue)' : undefined,
+                    }}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Messages list */}
+            {(() => {
+              const filtered = messages.filter((m) => {
+                if (messageFilter === 'unread' && m.read) return false;
+                if (messageFilter === 'read' && !m.read) return false;
+                if (messageSearch.trim()) {
+                  const q = messageSearch.toLowerCase();
+                  return (
+                    m.name.toLowerCase().includes(q) ||
+                    m.email.toLowerCase().includes(q) ||
+                    m.subject.toLowerCase().includes(q) ||
+                    m.message.toLowerCase().includes(q)
+                  );
+                }
+                return true;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', border: '1px dashed var(--line)', borderRadius: '16px', background: 'var(--paper)' }}>
+                    <div style={{ fontSize: '36px', marginBottom: '12px' }}>📬</div>
+                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>No inquiries found</h3>
+                    <p style={{ color: 'var(--muted)', fontSize: '14px', maxWidth: '420px', margin: '0 auto' }}>
+                      {messages.length === 0
+                        ? 'No contact messages have been received yet. When visitors submit the Contact Us form, their inquiries will appear here.'
+                        : 'No messages matched your current search or filter criteria.'}
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {filtered.map((msg) => (
+                    <div
+                      key={msg.id}
+                      style={{
+                        background: msg.read ? 'var(--paper)' : '#fff',
+                        border: msg.read ? '1px solid var(--line)' : '2px solid rgba(0, 98, 155, 0.4)',
+                        boxShadow: msg.read ? 'none' : '0 4px 18px rgba(0, 98, 155, 0.08)',
+                        borderRadius: '16px',
+                        padding: '24px',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '3px 10px',
+                                borderRadius: '999px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                background: msg.read ? 'rgba(0,0,0,0.06)' : '#dbeafe',
+                                color: msg.read ? 'var(--muted)' : '#1e40af',
+                              }}
+                            >
+                              {!msg.read && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563eb' }}></span>}
+                              {msg.read ? 'Read' : 'New Inquiry'}
+                            </span>
+                            <span style={{ fontSize: '12px', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                              {new Date(msg.createdAt).toLocaleString('en-US', {
+                                dateStyle: 'medium',
+                                timeStyle: 'short',
+                              })}
+                            </span>
+                          </div>
+
+                          <h3 style={{ fontSize: '18px', marginTop: '8px', color: 'var(--ink)' }}>
+                            {msg.subject || '(No Subject)'}
+                          </h3>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <a
+                            href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject || 'IEEE CS Inquiry'}`)}`}
+                            className="btn primary"
+                            style={{ fontSize: '12px', padding: '6px 14px' }}
+                          >
+                            ✉️ Reply
+                          </a>
+                          <button
+                            onClick={() => handleToggleMessageRead(msg.id, msg.read)}
+                            className="btn secondary"
+                            style={{ fontSize: '12px', padding: '6px 14px' }}
+                          >
+                            {msg.read ? 'Mark Unread' : 'Mark as Read'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="btn secondary"
+                            style={{ fontSize: '12px', padding: '6px 12px', color: '#dc2626' }}
+                            title="Delete Inquiry"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '16px',
+                          padding: '10px 16px',
+                          background: 'rgba(0, 98, 155, 0.04)',
+                          borderRadius: '10px',
+                          marginBottom: '16px',
+                          fontSize: '13px',
+                        }}
+                      >
+                        <div>
+                          <strong style={{ color: 'var(--muted)', marginRight: '6px' }}>Sender:</strong>
+                          <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{msg.name}</span>
+                        </div>
+                        <div>
+                          <strong style={{ color: 'var(--muted)', marginRight: '6px' }}>Email:</strong>
+                          <a href={`mailto:${msg.email}`} style={{ color: 'var(--blue)', textDecoration: 'underline' }}>
+                            {msg.email}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          padding: '16px 20px',
+                          background: 'var(--white)',
+                          border: '1px solid var(--line)',
+                          borderRadius: '12px',
+                          fontSize: '14px',
+                          lineHeight: '1.7',
+                          color: 'var(--ink)',
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {msg.message}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
