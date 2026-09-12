@@ -93,6 +93,10 @@ p {
   box-shadow: 0 0 0 5px rgba(255, 108, 12, 0.1);
 }
 
+.hero .eyebrow::before {
+  display: none;
+}
+
 .section {
   padding: clamp(80px, 10vw, 140px) 0;
 }
