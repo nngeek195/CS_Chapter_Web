@@ -663,6 +663,17 @@ p {
   text-transform: uppercase;
   color: var(--blue);
   cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.24s var(--ease), color 0.24s var(--ease);
+}
+
+.link-arrow:hover {
+  transform: translateX(6px);
+  color: var(--orange);
+}
+
+.link-arrow:active {
+  transform: translateX(3px);
 }
 
 .list-rows {
@@ -1243,7 +1254,7 @@ footer {
   position: relative;
   background: #06131d;
   color: #fff;
-  padding: 84px 0 32px;
+  padding: 52px 0 28px;
   margin-top: auto;
   overflow: hidden;
 }
@@ -1255,7 +1266,7 @@ footer::before {
   top: 0;
   left: 0;
   right: 0;
-  height: 180px;
+  height: 100px;
   background: linear-gradient(180deg, rgba(0, 98, 155, 0.16) 0%, rgba(6, 19, 29, 0.04) 65%, transparent 100%);
   pointer-events: none;
   z-index: 1;
@@ -1270,7 +1281,7 @@ footer::after {
   transform: translateX(-50%);
   width: 90%;
   max-width: 1200px;
-  height: 380px;
+  height: 220px;
   background: radial-gradient(ellipse at 50% 100%, rgba(0, 98, 155, 0.14) 0%, rgba(6, 19, 29, 0) 70%);
   pointer-events: none;
   z-index: 0;
@@ -1284,7 +1295,7 @@ footer .container {
 .footer-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  gap: 44px;
+  gap: 32px;
 }
 
 footer h4 {
@@ -1296,7 +1307,7 @@ footer h4 {
 
 footer a {
   display: block;
-  padding: 7px 0;
+  padding: 5px 0;
   color: rgba(255, 255, 255, 0.66);
   font-size: 13px;
   transition: color 0.2s;
@@ -1388,15 +1399,7 @@ footer a:hover {
 }
 
 .footer-mark {
-  position: relative;
-  z-index: 2;
-  margin-top: 70px;
-  font: 600 clamp(60px, 15vw, 190px)/0.76 "Montserrat", sans-serif;
-  letter-spacing: -0.065em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.13);
-  user-select: none;
-  pointer-events: none;
+  display: none;
 }
 
 .footer-bottom {
@@ -1404,8 +1407,8 @@ footer a:hover {
   justify-content: space-between;
   gap: 18px;
   flex-wrap: wrap;
-  padding-top: 20px;
-  margin-top: 26px;
+  padding-top: 18px;
+  margin-top: 32px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.38);
   font-size: 10px;

@@ -77,8 +77,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Restored IEEE CS Chapter Mark */}
-        <div className="footer-mark">IEEE CS</div>
+
 
         <div className="footer-bottom">
           <span>IEEE Computer Society Chapter <br /> Sabaragamuwa University of Sri Lanka</span>
