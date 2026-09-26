@@ -2,35 +2,29 @@
 
 import React, { useState, useEffect } from 'react';
 import TiltCard from '@/components/TiltCard';
-import LeadershipAccordion from '@/components/LeadershipAccordion';
 import {
   getFacultyAdvisor,
   getCommittee,
-  getPastCommittees,
 } from '@/lib/firestore';
 import {
   INITIAL_ADVISOR,
   INITIAL_COMMITTEE,
-  INITIAL_PAST_COMMITTEES,
 } from '@/lib/seedData';
 import {
   FacultyAdvisorData,
   CommitteeMember,
-  PastCommittee,
 } from '@/lib/types';
 
 export default function LeadershipPage() {
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
   const [committee, setCommittee] = useState<CommitteeMember[]>(INITIAL_COMMITTEE);
-  const [pastCommittees, setPastCommittees] = useState<PastCommittee[]>(INITIAL_PAST_COMMITTEES);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getFacultyAdvisor(), getCommittee(), getPastCommittees()])
-      .then(([adv, comm, past]) => {
+    Promise.all([getFacultyAdvisor(), getCommittee()])
+      .then(([adv, comm]) => {
         if (adv) setAdvisor(adv);
         if (comm && comm.length > 0) setCommittee(comm);
-        if (past && past.length > 0) setPastCommittees(past);
       })
       .catch((err) => console.warn('Leadership fetch fallback:', err))
       .finally(() => setLoading(false));
@@ -160,19 +154,6 @@ export default function LeadershipPage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Past Leadership Accordion */}
-      <section className="section section-dark">
-        <div className="container">
-          <div className="eyebrow mono">Past leadership</div>
-          <h2 className="section-title">Honoring alumni contributions.</h2>
-          <p style={{ marginTop: '14px', maxWidth: '60ch', color: 'rgba(255,255,255,0.7)' }}>
-            Each committee paved the way for subsequent cohorts. Explore previous student leaders who shaped our chapter.
-          </p>
-
-          <LeadershipAccordion committees={pastCommittees} initialLimit={3} />
         </div>
       </section>
     </>
