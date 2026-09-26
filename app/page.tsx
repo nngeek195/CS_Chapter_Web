@@ -145,10 +145,12 @@ export default function HomePage() {
       {/* Featured Spotlight */}
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div className="split" style={{ alignItems: 'end' }}>
+          <div className="spotlight-head">
             <div>
               <div className="eyebrow mono">Featured / upcoming</div>
-              <h2 className="section-title">One strong spotlight, not an event dump.</h2>
+              <h2 className="section-title">
+                One strong spotlight,<br />not an event dump.
+              </h2>
               <p className="section-lead">
                 Keeping the spotlight on what matters now, with the full archive preserved on the Events page.
               </p>
@@ -158,17 +160,19 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="feature" style={{ marginTop: '42px' }}>
-            <img
-              src={spotlight.image}
-              alt={spotlight.title}
-            />
+          <div className="feature">
+            <div className="feature-media">
+              <img
+                src={spotlight.image}
+                alt={spotlight.title}
+              />
+            </div>
             <div className="feature-overlay">
               <div className="date-chip">{spotlight.tag}</div>
               <h3>{spotlight.title}</h3>
               <p>{spotlight.description}</p>
               {spotlight.link && (
-                <Link href={spotlight.link} className="link-arrow" style={{ marginTop: '12px', display: 'inline-block' }}>
+                <Link href={spotlight.link} className="link-arrow">
                   Explore Spotlight →
                 </Link>
               )}
