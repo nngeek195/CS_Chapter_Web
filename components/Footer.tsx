@@ -38,7 +38,7 @@ export default function Footer() {
 
       <div className="container">
         <div className="footer-grid">
-          <div>
+          <div className="footer-brand">
             <Link href="/" className="brand" aria-label="IEEE CS SUSL Chapter Home">
               <img
                 src={Logo.src}
@@ -52,28 +52,30 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
-            <h4>Explore</h4>
-            <Link href="/about">About</Link>
-            <Link href="/leadership">Leadership</Link>
-            <Link href="/events">Events</Link>
-            <Link href="/gallery">Gallery</Link>
-          </div>
+          <div className="footer-links">
+            <div>
+              <h4>Explore</h4>
+              <Link href="/about">About</Link>
+              <Link href="/leadership">Leadership</Link>
+              <Link href="/events">Events</Link>
+              <Link href="/gallery">Gallery</Link>
+            </div>
 
-          <div>
-            <h4>Participate</h4>
-            <Link href="/membership">Membership</Link>
-            <Link href="/resources">Resources</Link>
-            <Link href="/contact">Contact</Link>
-            <Link href="/admin">Portal Login</Link>
-          </div>
+            <div>
+              <h4>Participate</h4>
+              <Link href="/membership">Membership</Link>
+              <Link href="/resources">Resources</Link>
+              <Link href="/contact">Contact</Link>
+              <Link href="/admin">Portal Login</Link>
+            </div>
 
-          <div>
-            <h4>Connect</h4>
-            <a href="https://www.linkedin.com/company/ieee-cs-student-branch-chapter-susl" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a href="https://www.instagram.com/ieee_cs_susl?stkn=MWx2d2k4Y2FkaHU2eQ==" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="https://www.facebook.com/share/1Fgqg7JcxD/" target="_blank" rel="noopener noreferrer">Facebook</a>
-            <a href="mailto:ieeecs@sab.ac.lk">ieeecs@sab.ac.lk</a>
+            <div>
+              <h4>Connect</h4>
+              <a href="https://www.linkedin.com/company/ieee-cs-student-branch-chapter-susl" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a href="https://www.instagram.com/ieee_cs_susl?stkn=MWx2d2k4Y2FkaHU2eQ==" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.facebook.com/share/1Fgqg7JcxD/" target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a href="mailto:ieeecs@sab.ac.lk">ieeecs@sab.ac.lk</a>
+            </div>
           </div>
         </div>
 

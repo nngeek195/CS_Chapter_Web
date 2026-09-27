@@ -83,11 +83,6 @@ export default function HomePage() {
               </MagneticButton>
             </div>
           </div>
-
-          <div className="hero-foot">
-            <div className="line mono">Scroll to explore the chapter</div>
-            <div className="mono">Sabaragamuwa University · Sri Lanka</div>
-          </div>
         </div>
       </section>
 
@@ -156,9 +151,6 @@ export default function HomePage() {
                 Keeping the spotlight on what matters now, with the full archive preserved on the Events page.
               </p>
             </div>
-            <Link className="link-arrow" href="/events">
-              View all events →
-            </Link>
           </div>
 
           <div className="feature">
@@ -178,6 +170,12 @@ export default function HomePage() {
                 </Link>
               )}
             </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+            <MagneticButton href="/events" variant="primary">
+              View all events →
+            </MagneticButton>
           </div>
         </div>
       </section>
