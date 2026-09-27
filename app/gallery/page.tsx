@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import GalleryLightbox from '@/components/GalleryLightbox';
+import PageHero from '@/components/PageHero';
 import { getGalleryPhotos } from '@/lib/firestore';
 import { INITIAL_GALLERY } from '@/lib/seedData';
 import { GalleryPhoto } from '@/lib/types';
@@ -25,17 +26,11 @@ export default function GalleryPage() {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            05 · GALLERY
-          </div>
-          <h1>Moments in action.</h1>
-          <p>
-            Snapshots from our workshops, competitive programming marathons, speaker series, and chapter milestones.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="05 · GALLERY"
+        title="Moments in action."
+        description="Snapshots from our workshops, competitive programming marathons, speaker series, and chapter milestones."
+      />
 
       <section className="section">
         <div className="container">

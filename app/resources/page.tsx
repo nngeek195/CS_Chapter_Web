@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TiltCard from '@/components/TiltCard';
+import PageHero from '@/components/PageHero';
 import { getResources } from '@/lib/firestore';
 import { INITIAL_RESOURCES } from '@/lib/seedData';
 import { ResourceItem } from '@/lib/types';
@@ -25,18 +26,11 @@ export default function ResourcesPage() {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            04 · RESOURCES
-          </div>
-          <h1>Learn, build, and publish.</h1>
-          <p>
-            Curated learning tracks, coding challenge archives, research guidelines, and engineering toolkits
-            maintained by IEEE CS SUSL members.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="04 · RESOURCES"
+        title="Learn, build, and publish."
+        description="Curated learning tracks, coding challenge archives, research guidelines, and engineering toolkits maintained by IEEE CS SUSL members."
+      />
 
       <section className="section">
         <div className="container">

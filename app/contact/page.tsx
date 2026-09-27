@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import ContactForm from '@/components/ContactForm';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -10,18 +11,11 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            07 · CONTACT
-          </div>
-          <h1>Get in touch with us.</h1>
-          <p>
-            Have a collaboration idea, question about chapter membership, or want to sponsor an event?
-            We would love to hear from you.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="07 · CONTACT"
+        title="Get in touch with us."
+        description="Have a collaboration idea, question about chapter membership, or want to sponsor an event? We would love to hear from you."
+      />
 
       <section className="section">
         <div className="container">

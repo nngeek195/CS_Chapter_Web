@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import TiltCard from '@/components/TiltCard';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -10,18 +11,11 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            01 · ABOUT US
-          </div>
-          <h1>Why this chapter exists.</h1>
-          <p>
-            Mission, history and relationship with IEEE Computer Society, IEEE Sri Lanka Section and
-            Sabaragamuwa University of Sri Lanka.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="01 · ABOUT US"
+        title="Why this chapter exists."
+        description="Mission, history and relationship with IEEE Computer Society, IEEE Sri Lanka Section and Sabaragamuwa University of Sri Lanka."
+      />
 
       {/* Mission & Vision */}
       <section className="section">

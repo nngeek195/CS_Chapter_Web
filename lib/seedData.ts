@@ -174,6 +174,7 @@ export const INITIAL_COMMITTEE: CommitteeMember[] = [
     department: 'Computing & Information Systems',
     batch: '2023/2024 Batch',
     order: 6,
+    image: '/images/publicVisibilityChair.png',
   },
 ];
 

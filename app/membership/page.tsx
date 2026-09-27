@@ -4,6 +4,7 @@ import Link from 'next/link';
 import TiltCard from '@/components/TiltCard';
 import FaqAccordion from '@/components/FaqAccordion';
 import MagneticButton from '@/components/MagneticButton';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Membership',
@@ -36,28 +37,22 @@ export default function MembershipPage() {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            06 · MEMBERSHIP
-          </div>
-          <h1>Join the learning loop.</h1>
-          <p>
-            A clear pathway: Join IEEE → Add Computer Society membership → Engage in SUSL chapter activities
-            and leadership.
-          </p>
-          <div className="cs-membership">
-            <a
-              href="https://www.ieee.org/membership-catalog/productdetail/showProductDetailPage.html?product=MEMC016"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn primary"
-            >
-              Secure the Membership
-            </a>
-          </div>
+      <PageHero
+        eyebrow="06 · MEMBERSHIP"
+        title="Join the learning loop."
+        description="A clear pathway: Join IEEE → Add Computer Society membership → Engage in SUSL chapter activities and leadership."
+      >
+        <div className="cs-membership">
+          <a
+            href="https://www.ieee.org/membership-catalog/productdetail/showProductDetailPage.html?product=MEMC016"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn primary"
+          >
+            Secure the Membership
+          </a>
         </div>
-      </section>
+      </PageHero>
 
       {/* 3 Simple Steps */}
       <section className="section">

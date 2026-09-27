@@ -138,7 +138,14 @@ export async function getCommittee(): Promise<CommitteeMember[]> {
   try {
     const snap = await getDocs(collection(db, 'leadership'));
     if (!snap.empty) {
-      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() } as CommitteeMember));
+      const items = snap.docs.map((d) => {
+        const data = d.data() as CommitteeMember;
+        const item: CommitteeMember = { ...data, id: d.id };
+        if (!item.image && (item.id === 'cm-6' || item.role?.toLowerCase().includes('visibility') || item.name?.toLowerCase().includes('nisal'))) {
+          item.image = '/images/publicVisibilityChair.png';
+        }
+        return item;
+      });
       return items.sort((a, b) => (a.order || 99) - (b.order || 99));
     }
   } catch (err) {
@@ -221,6 +228,10 @@ export async function getPastCommittees(): Promise<PastCommittee[]> {
     const snap = await getDocs(collection(db, 'past_committees'));
     if (!snap.empty) {
       const items = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PastCommittee));
+      if (!items.some((i) => i.year?.includes('2024'))) {
+        const item2024 = INITIAL_PAST_COMMITTEES.find((p) => p.year.includes('2024'));
+        if (item2024) items.unshift(item2024);
+      }
       return items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     }
   } catch (err) {

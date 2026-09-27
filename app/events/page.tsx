@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import EventFilterGrid from '@/components/EventFilterGrid';
+import PageHero from '@/components/PageHero';
 import { getEvents, getEventCategories } from '@/lib/firestore';
 import { INITIAL_EVENTS, INITIAL_CATEGORIES } from '@/lib/seedData';
 import { EventItem, EventCategory } from '@/lib/types';
@@ -23,17 +24,11 @@ export default function EventsPage() {
 
   return (
     <>
-      <section className="page-hero">
-        <div className="container">
-          <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            03 · EVENTS
-          </div>
-          <h1>Events are the engine.</h1>
-          <p>
-            Upcoming events, past events and flagship chapter activities in one interactive, filterable archive.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="03 · EVENTS"
+        title="Events are the engine."
+        description="Upcoming events, past events and flagship chapter activities in one interactive, filterable archive."
+      />
 
       <section className="section">
         <div className="container">
