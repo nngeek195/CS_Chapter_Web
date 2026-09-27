@@ -7,6 +7,7 @@ import TiltCard from '@/components/TiltCard';
 import MagneticButton from '@/components/MagneticButton';
 import Scene from '@/components/Scene';
 import LoadingScreen from '@/components/LoadingScreen';
+import AdvisorCard from '@/components/AdvisorCard';
 import { getSpotlight, getFacultyAdvisor } from '@/lib/firestore';
 import { INITIAL_SPOTLIGHT, INITIAL_ADVISOR } from '@/lib/seedData';
 import { SpotlightData, FacultyAdvisorData } from '@/lib/types';
@@ -234,28 +235,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="surface advisor">
-            {advisor.image ? (
-              <img
-                src={advisor.image}
-                alt={advisor.name}
-                className="advisor-photo"
-                style={{ objectFit: 'cover' }}
-              />
-            ) : (
-              <div className="advisor-photo">{advisor.initials || 'FA'}</div>
-            )}
-            <div>
-              <div className="eyebrow mono">{advisor.title}</div>
-              <h3 style={{ fontSize: '30px' }}>{advisor.name}</h3>
-              <p style={{ marginTop: '10px' }}>
-                {advisor.department}. {advisor.bio}
-              </p>
-              <Link href="/leadership" className="link-arrow" style={{ marginTop: '14px' }}>
-                View Full Executive Committee →
-              </Link>
-            </div>
-          </div>
+          <AdvisorCard advisor={advisor} mode="preview" />
         </div>
       </section>
     </>

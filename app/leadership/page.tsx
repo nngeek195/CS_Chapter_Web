@@ -1,25 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import TiltCard from '@/components/TiltCard';
 import LeadershipAccordion from '@/components/LeadershipAccordion';
 import PageHero from '@/components/PageHero';
-import SocialLinks from '@/components/SocialLinks';
-import {
-  getFacultyAdvisor,
-  getCommittee,
-  getPastCommittees,
-} from '@/lib/firestore';
-import {
-  INITIAL_ADVISOR,
-  INITIAL_COMMITTEE,
-  INITIAL_PAST_COMMITTEES,
-} from '@/lib/seedData';
-import {
-  FacultyAdvisorData,
-  CommitteeMember,
-  PastCommittee,
-} from '@/lib/types';
+import AdvisorCard from '@/components/AdvisorCard';
+import PersonCard from '@/components/PersonCard';
+import { getFacultyAdvisor, getCommittee, getPastCommittees } from '@/lib/firestore';
+import { INITIAL_ADVISOR, INITIAL_COMMITTEE, INITIAL_PAST_COMMITTEES } from '@/lib/seedData';
+import { FacultyAdvisorData, CommitteeMember, PastCommittee } from '@/lib/types';
 
 export default function LeadershipPage() {
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
@@ -50,26 +38,7 @@ export default function LeadershipPage() {
       <section className="section">
         <div className="container">
           <div className="eyebrow mono">{advisor.title || 'Faculty Advisor'}</div>
-          <div className="surface advisor">
-            {advisor.image ? (
-              <img
-                src={advisor.image}
-                alt={advisor.name}
-                className="advisor-photo"
-                style={{ objectFit: 'cover' }}
-              />
-            ) : (
-              <div className="advisor-photo">{advisor.initials || 'FA'}</div>
-            )}
-            <div>
-              <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)' }}>{advisor.name}</h2>
-              <p style={{ fontWeight: 600, color: 'var(--blue)', marginTop: '6px' }}>
-                {advisor.department}
-              </p>
-              <p style={{ marginTop: '12px' }}>{advisor.bio}</p>
-              <SocialLinks linkedin={advisor.linkedin} email={advisor.email} />
-            </div>
-          </div>
+          <AdvisorCard advisor={advisor} />
         </div>
       </section>
 
@@ -89,47 +58,9 @@ export default function LeadershipPage() {
             </p>
           ) : (
             <div className="person-grid" style={{ marginTop: '38px' }}>
-              {committee.map((person) => {
-                const img =
-                  person.image ||
-                  (person.role?.toLowerCase().includes('visibility') ||
-                  person.name?.toLowerCase().includes('nisal')
-                    ? '/images/publicVisibilityChair.png'
-                    : undefined);
-
-                return (
-                  <TiltCard key={person.id} className="person">
-                    {img ? (
-                      <img
-                        src={img}
-                        alt={person.name}
-                        className="person-avatar"
-                        style={{
-                          objectFit: 'cover',
-                          objectPosition: 'top center',
-                          background: '#f1f5f9',
-                          padding: 0,
-                        }}
-                      />
-                    ) : (
-                      <div className="person-avatar">{person.initials}</div>
-                    )}
-                    <h3>{person.name}</h3>
-                    <div className="role">{person.role}</div>
-                    <div className="batch">{person.batch}</div>
-                    {person.department && (
-                      <p style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '6px' }}>
-                        {person.department}
-                      </p>
-                    )}
-                    <SocialLinks
-                      linkedin={person.linkedin}
-                      email={person.email}
-                      alwaysShowPlaceholders
-                    />
-                  </TiltCard>
-                );
-              })}
+              {committee.map((person) => (
+                <PersonCard key={person.id} person={person} />
+              ))}
             </div>
           )}
         </div>

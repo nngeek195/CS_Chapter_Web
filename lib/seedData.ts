@@ -191,39 +191,6 @@ export const INITIAL_PAST_COMMITTEES: PastCommittee[] = [
     ],
     createdAt: 20250101,
   },
-  {
-    id: 'pc-2023-2024',
-    year: '2023 / 2024',
-    members: [
-      'President: Dineth Gunawardena',
-      'Vice President: Kaveesha Rodrigo',
-      'Secretary: Lakshan Senanayake',
-      'Treasurer: Nuwantha Ekanayake',
-      'Editor / Webmaster: Tharindu Weerasinghe',
-    ],
-    createdAt: 20240101,
-  },
-  {
-    id: 'pc-2022-2023',
-    year: '2022 / 2023',
-    members: [
-      'President: Roshen Silva',
-      'Vice President: Dilshan Perera',
-      'Secretary: Chamathka Fernando',
-      'Treasurer: Mihiran Jayawardena',
-    ],
-    createdAt: 20230101,
-  },
-  {
-    id: 'pc-2021-2022',
-    year: '2021 / 2022',
-    members: [
-      'President: Tharaka Bandara',
-      'Secretary: Sanduni Gamage',
-      'Treasurer: Janith Wijesinghe',
-    ],
-    createdAt: 20220101,
-  },
 ];
 
 export const INITIAL_RESOURCES: ResourceItem[] = [
