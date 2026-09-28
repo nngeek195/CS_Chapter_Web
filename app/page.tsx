@@ -8,20 +8,94 @@ import MagneticButton from '@/components/MagneticButton';
 import Scene from '@/components/Scene';
 import LoadingScreen from '@/components/LoadingScreen';
 import AdvisorCard from '@/components/AdvisorCard';
-import { getSpotlight, getFacultyAdvisor } from '@/lib/firestore';
-import { INITIAL_SPOTLIGHT, INITIAL_ADVISOR } from '@/lib/seedData';
-import { SpotlightData, FacultyAdvisorData } from '@/lib/types';
+import EventsCarousel, { EventSlideItem } from '@/components/EventsCarousel';
+import { getSpotlight, getEvents, getFacultyAdvisor } from '@/lib/firestore';
+import { INITIAL_SPOTLIGHT, INITIAL_EVENTS, INITIAL_ADVISOR } from '@/lib/seedData';
+import { SpotlightData, EventItem, FacultyAdvisorData } from '@/lib/types';
 
 export default function HomePage() {
   const [animationLoaded, setAnimationLoaded] = useState(false);
   const [orbOffset, setOrbOffset] = useState({ x: 0, y: 0 });
   const [spotlight, setSpotlight] = useState<SpotlightData>(INITIAL_SPOTLIGHT);
+  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
 
   useEffect(() => {
-    getSpotlight().then(setSpotlight);
+    getSpotlight().then((data) => {
+      if (data) setSpotlight(data);
+    });
+    getEvents().then((evts) => {
+      if (evts && evts.length > 0) setEvents(evts);
+    });
     getFacultyAdvisor().then(setAdvisor);
   }, []);
+
+  const featuredEventSlides = React.useMemo<EventSlideItem[]>(() => {
+    const list: EventSlideItem[] = [];
+
+    // 1. Featured spotlight card (InnovaX / active spotlight)
+    if (spotlight && spotlight.title) {
+      list.push({
+        id: 'spotlight-featured',
+        title: spotlight.title,
+        description: spotlight.description,
+        image: spotlight.image,
+        tag: spotlight.tag || 'Flagship Series · 2026',
+        typeLabel: 'Featured Spotlight',
+        type: 'flagship',
+        date: spotlight.tag || 'Featured 2026',
+        link: spotlight.link || '/events',
+        tags: ['Spotlight', 'Flagship', 'IEEE CS'],
+        isSpotlight: true,
+      });
+    }
+
+    // 2. Upcoming & Flagship events from events collection
+    const upcomingAndFlagship = events.filter(
+      (e) => e.type === 'upcoming' || e.type === 'flagship'
+    );
+
+    upcomingAndFlagship.forEach((evt) => {
+      if (!list.some((s) => s.title.trim().toLowerCase() === evt.title.trim().toLowerCase())) {
+        list.push({
+          id: evt.id,
+          title: evt.title,
+          description: evt.description,
+          image: evt.image,
+          tag: evt.typeLabel || (evt.type === 'flagship' ? 'Flagship' : 'Upcoming'),
+          typeLabel: evt.typeLabel || (evt.type === 'flagship' ? 'Flagship' : 'Upcoming Event'),
+          type: evt.type,
+          date: evt.date,
+          link: evt.link || '/events',
+          tags: evt.tags || ['Chapter', 'CS'],
+          isSpotlight: false,
+        });
+      }
+    });
+
+    // 3. If there are fewer than 3 events, fill with other events for full carousel depth
+    if (list.length < 3) {
+      events.forEach((evt) => {
+        if (!list.some((s) => s.title.trim().toLowerCase() === evt.title.trim().toLowerCase())) {
+          list.push({
+            id: evt.id,
+            title: evt.title,
+            description: evt.description,
+            image: evt.image,
+            tag: evt.typeLabel || evt.type,
+            typeLabel: evt.typeLabel || 'Chapter Event',
+            type: evt.type,
+            date: evt.date,
+            link: evt.link || '/events',
+            tags: evt.tags || ['Chapter', 'CS'],
+            isSpotlight: false,
+          });
+        }
+      });
+    }
+
+    return list;
+  }, [spotlight, events]);
 
   const stats = [
     { end: 120, suffix: '+', label: 'Active members' },
@@ -138,41 +212,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Spotlight */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      {/* Featured Events Section */}
+      <section className="section" style={{ paddingTop: 0, overflow: 'hidden' }}>
         <div className="container">
           <div className="spotlight-head">
             <div>
               <div className="eyebrow mono">Featured / upcoming</div>
-              <h2 className="section-title">
-                One strong spotlight,<br />not an event dump.
-              </h2>
+              <h2 className="section-title">Our Events</h2>
               <p className="section-lead">
                 Keeping the spotlight on what matters now, with the full archive preserved on the Events page.
               </p>
             </div>
           </div>
 
-          <div className="feature">
-            <div className="feature-media">
-              <img
-                src={spotlight.image}
-                alt={spotlight.title}
-              />
-            </div>
-            <div className="feature-overlay">
-              <div className="date-chip">{spotlight.tag}</div>
-              <h3>{spotlight.title}</h3>
-              <p>{spotlight.description}</p>
-              {spotlight.link && (
-                <Link href={spotlight.link} className="link-arrow">
-                  Explore Spotlight →
-                </Link>
-              )}
-            </div>
-          </div>
+          <EventsCarousel events={featuredEventSlides} />
 
-          <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <div style={{ textAlign: 'center', marginTop: '36px' }}>
             <MagneticButton href="/events" variant="primary">
               View all events →
             </MagneticButton>
@@ -181,7 +236,8 @@ export default function HomePage() {
       </section>
 
       {/* Why Join IEEE CS */}
-      <section className="section section-dark">
+      <section className="section section-dark why-join-section">
+        <div className="why-join-bg" />
         <div className="container">
           <div className="eyebrow mono">Why join IEEE CS</div>
           <h2 className="section-title">More than a membership badge.</h2>

@@ -631,7 +631,7 @@ export default function AdminDashboardPage() {
           <div className="admin-panel">
             <div className="admin-panel-head">
               <h2>Featured Spotlight</h2>
-              <p>Controls the hero card under "One strong spotlight, not an event dump" on the home page.</p>
+              <p>Controls the hero card under &quot;Our Events&quot; on the home page.</p>
             </div>
 
             <form onSubmit={handleSpotlightSave} className="admin-form">
