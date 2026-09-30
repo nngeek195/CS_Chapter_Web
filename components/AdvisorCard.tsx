@@ -11,43 +11,64 @@ interface AdvisorCardProps {
 export default function AdvisorCard({ advisor, mode = 'full' }: AdvisorCardProps) {
   const isPreview = mode === 'preview';
 
+  const rawName = advisor.name && advisor.name !== 'Dr. / Senior Lecturer' ? advisor.name : 'Mrs. Saranga Somaweera';
+  const initials = advisor.initials && advisor.initials !== 'FA' ? advisor.initials : 'SS';
+
+  const [imgError, setImgError] = React.useState(false);
+  const advisorPhoto = !imgError && (advisor.image && advisor.image.trim() !== '' ? advisor.image : '/images/advisor.webp');
+
   return (
-    <div className="surface advisor">
-      {advisor.image ? (
-        <img
-          src={advisor.image}
-          alt={advisor.name}
-          className="advisor-photo"
-          style={{ objectFit: 'cover' }}
-        />
-      ) : (
-        <div className="advisor-photo">{advisor.initials || 'FA'}</div>
-      )}
-      <div>
-        {isPreview && <div className="eyebrow mono">{advisor.title}</div>}
-        {isPreview ? (
-          <h3 style={{ fontSize: '30px' }}>{advisor.name}</h3>
+    <div className={`surface advisor ${isPreview ? 'advisor-preview' : 'advisor-full'}`}>
+      <div className="advisor-media">
+        {advisorPhoto ? (
+          <img
+            src={advisorPhoto}
+            alt={rawName}
+            className="advisor-photo"
+            onError={() => setImgError(true)}
+          />
         ) : (
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)' }}>{advisor.name}</h2>
+          <div className="advisor-photo advisor-photo-placeholder">{initials}</div>
         )}
-        <p
-          style={{
-            fontWeight: isPreview ? 400 : 600,
-            color: isPreview ? 'inherit' : 'var(--blue)',
-            marginTop: isPreview ? '10px' : '6px',
-          }}
-        >
-          {advisor.department}
-          {isPreview ? `. ${advisor.bio}` : ''}
-        </p>
-        {!isPreview && <p style={{ marginTop: '12px' }}>{advisor.bio}</p>}
+      </div>
+
+      <div className="advisor-content">
+        {isPreview && (
+          <div className="advisor-eyebrow eyebrow mono">
+            {advisor.title === 'Faculty Advisor' ? 'Advisor' : (advisor.title || 'Advisor')}
+          </div>
+        )}
 
         {isPreview ? (
-          <Link href="/leadership" className="link-arrow" style={{ marginTop: '14px' }}>
-            View Full Executive Committee →
+          <h3 className="advisor-name">
+            <span className="advisor-name-text">{rawName}</span>
+            <span className="advisor-role-badge">- Senior Lecturer</span>
+          </h3>
+        ) : (
+          <h2 className="advisor-name advisor-name-large">
+            <span className="advisor-name-text">{rawName}</span>
+            <span className="advisor-role-badge">- Senior Lecturer</span>
+          </h2>
+        )}
+
+        <div className="advisor-meta">
+          <p className="advisor-dept">{advisor.department}</p>
+          {advisor.bio && (
+            <p className={isPreview ? 'advisor-bio-preview' : 'advisor-bio-full'}>
+              {advisor.bio}
+            </p>
+          )}
+        </div>
+
+        {isPreview ? (
+          <Link href="/leadership" className="advisor-link">
+            <span>View Executive Committee</span>
+            <span className="advisor-arrow" aria-hidden="true">→</span>
           </Link>
         ) : (
-          <SocialLinks linkedin={advisor.linkedin} email={advisor.email} />
+          <div className="advisor-socials-wrap">
+            <SocialLinks linkedin={advisor.linkedin} email={advisor.email} />
+          </div>
         )}
       </div>
     </div>

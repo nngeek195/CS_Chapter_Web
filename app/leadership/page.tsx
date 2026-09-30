@@ -37,7 +37,7 @@ export default function LeadershipPage() {
       {/* Faculty Advisor */}
       <section className="section">
         <div className="container">
-          <div className="eyebrow mono">{advisor.title || 'Faculty Advisor'}</div>
+          <div className="eyebrow mono">{advisor.title === 'Faculty Advisor' ? 'Advisor' : (advisor.title || 'Advisor')}</div>
           <AdvisorCard advisor={advisor} />
         </div>
       </section>

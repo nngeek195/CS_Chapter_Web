@@ -28,12 +28,13 @@ export const INITIAL_SPOTLIGHT: SpotlightData = {
 };
 
 export const INITIAL_ADVISOR: FacultyAdvisorData = {
-  name: 'Dr. / Senior Lecturer',
-  title: 'Faculty Advisor',
+  name: 'Mrs. Saranga Somaweera',
+  title: 'Advisor',
   department: 'Department of Computing & Information Systems',
   bio:
     'Guiding the student chapter with strategic vision, academic rigor, and mentorship. Bridging university research initiatives with international IEEE standards and industry relations.',
-  initials: 'FA',
+  initials: 'SS',
+  image: '/images/advisor.webp',
   email: 'ieeecs@sab.ac.lk',
   linkedin: 'https://linkedin.com',
 };

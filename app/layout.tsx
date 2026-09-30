@@ -7,8 +7,8 @@ import { AuthProvider } from '@/context/AuthContext';
 export const metadata: Metadata = {
   metadataBase: new URL('https://ieeecs-susl.ac.lk'),
   title: {
-    default: 'IEEE CS SUSL — IEEE Computer Society Chapter',
-    template: '%s — IEEE CS SUSL',
+    default: 'IEEE CS Chapter SUSL',
+    template: '%s',
   },
   description:
     'IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka. Empowering students with computing knowledge, workshops, hackathons, and research exposure.',
@@ -23,11 +23,15 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'IEEE CS SUSL' }],
   icons: {
-    icon: '/images/logo.png',
-    apple: '/images/logo.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/images/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/images/apple-icon.png',
   },
   openGraph: {
-    title: 'IEEE CS SUSL — IEEE Computer Society Chapter',
+    title: 'IEEE CS Chapter SUSL',
     description:
       'IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka.',
     images: [{ url: '/images/logo.png', width: 668, height: 299, alt: 'IEEE CS SUSL Logo' }],

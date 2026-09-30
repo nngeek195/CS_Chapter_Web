@@ -711,7 +711,7 @@ export default function AdminDashboardPage() {
                     type="text"
                     value={advisor.name}
                     onChange={(e) => setAdvisor({ ...advisor, name: e.target.value })}
-                    placeholder="Dr. / Senior Lecturer Name"
+                    placeholder="Mrs. Saranga Somaweera"
                     required
                   />
                 </div>
@@ -722,7 +722,7 @@ export default function AdminDashboardPage() {
                     type="text"
                     value={advisor.title}
                     onChange={(e) => setAdvisor({ ...advisor, title: e.target.value })}
-                    placeholder="Faculty Advisor"
+                    placeholder="Advisor"
                     required
                   />
                 </div>
