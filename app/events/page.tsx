@@ -25,7 +25,6 @@ export default function EventsPage() {
   return (
     <>
       <PageHero
-        eyebrow="03 · EVENTS"
         title="Events are the engine."
         description="Upcoming events, past events and flagship chapter activities in one interactive, filterable archive."
       />

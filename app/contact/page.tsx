@@ -12,7 +12,6 @@ export default function ContactPage() {
   return (
     <>
       <PageHero
-        eyebrow="07 · CONTACT"
         title="Get in touch with us."
         description="Have a collaboration idea, question about chapter membership, or want to sponsor an event? We would love to hear from you."
       />

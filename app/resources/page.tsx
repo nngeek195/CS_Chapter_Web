@@ -27,7 +27,6 @@ export default function ResourcesPage() {
   return (
     <>
       <PageHero
-        eyebrow="04 · RESOURCES"
         title="Learn, build, and publish."
         description="Curated learning tracks, coding challenge archives, research guidelines, and engineering toolkits maintained by IEEE CS SUSL members."
       />

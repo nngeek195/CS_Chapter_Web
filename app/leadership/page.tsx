@@ -29,7 +29,6 @@ export default function LeadershipPage() {
   return (
     <>
       <PageHero
-        eyebrow="02 · LEADERSHIP"
         title="People behind the chapter."
         description="Structured by role hierarchy so the advisor and executive committee are immediately understandable."
       />

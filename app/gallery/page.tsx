@@ -27,7 +27,6 @@ export default function GalleryPage() {
   return (
     <>
       <PageHero
-        eyebrow="05 · GALLERY"
         title="Moments in action."
         description="Snapshots from our workshops, competitive programming marathons, speaker series, and chapter milestones."
       />

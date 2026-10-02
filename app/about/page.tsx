@@ -12,7 +12,6 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
-        eyebrow="01 · ABOUT US"
         title="Why this chapter exists."
         description="Mission, history and relationship with IEEE Computer Society, IEEE Sri Lanka Section and Sabaragamuwa University of Sri Lanka."
       />

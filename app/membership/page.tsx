@@ -38,7 +38,6 @@ export default function MembershipPage() {
   return (
     <>
       <PageHero
-        eyebrow="06 · MEMBERSHIP"
         title="Join the learning loop."
         description="A clear pathway: Join IEEE → Add Computer Society membership → Engage in SUSL chapter activities and leadership."
       >
