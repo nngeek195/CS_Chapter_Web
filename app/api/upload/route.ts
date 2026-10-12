@@ -11,6 +11,7 @@ cloudinary.config({
   timeout: 120000,
 });
 
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: 'No file provided in form data' }, { status: 400 });
     }
+    
 
     // Convert file to a base64 data URI — avoids stream plumbing timeouts
     const bytes = await file.arrayBuffer();
@@ -30,6 +32,7 @@ export async function POST(request: NextRequest) {
       resource_type: 'auto',
     });
 
+    
     return NextResponse.json({
       url: uploadResponse.secure_url,
       public_id: uploadResponse.public_id,
@@ -37,6 +40,7 @@ export async function POST(request: NextRequest) {
       height: uploadResponse.height,
     });
 
+    
   } catch (error: any) {
     console.error('Cloudinary upload error:', error);
     return NextResponse.json(
@@ -44,4 +48,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  
 }
