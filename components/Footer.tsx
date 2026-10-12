@@ -19,6 +19,7 @@ export default function Footer() {
       .catch(() => setHasResources(false));
   }, []);
 
+  
   if (pathname?.startsWith('/admin')) {
     return (
       <footer style={{ borderTop: '1px solid var(--line)', padding: '20px 0', textAlign: 'center', fontSize: '13px', color: 'var(--muted)', background: 'var(--paper)' }}>
@@ -29,6 +30,7 @@ export default function Footer() {
     );
   }
 
+  
   return (
     <footer>
       {/* Background Typography Vortex animation with low opacity */}
@@ -46,6 +48,7 @@ export default function Footer() {
         />
       </div>
 
+      
       <div className="container">
         <div className="footer-grid">
           <div>
@@ -87,6 +90,7 @@ export default function Footer() {
           </div>
         </div>
 
+        
         {/* Restored IEEE CS Chapter Mark */}
         <div className="footer-mark">IEEE CS</div>
 
