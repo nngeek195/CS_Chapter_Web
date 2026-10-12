@@ -12,6 +12,7 @@ interface EventFilterGridProps {
   categories?: EventCategory[];
 }
 
+
 export default function EventFilterGrid({
   events,
   categories = INITIAL_CATEGORIES,
@@ -44,6 +45,7 @@ export default function EventFilterGrid({
       url: shareUrl,
     };
 
+    
     if (navigator.share) {
       try {
         await navigator.share(shareData);
@@ -55,6 +57,7 @@ export default function EventFilterGrid({
       }
     }
 
+    
     // Fallback: Copy link to clipboard
     try {
       await navigator.clipboard.writeText(`${shareData.title}\n${shareUrl}`);
