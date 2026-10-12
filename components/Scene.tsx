@@ -12,12 +12,17 @@ export function Scene({ onLoaded }: SceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const loadedNotified = useRef(false);
 
+  const onLoadedRef = useRef(onLoaded);
+  useEffect(() => {
+    onLoadedRef.current = onLoaded;
+  }, [onLoaded]);
+
   // Notify when animation is ready
   useEffect(() => {
     const notifyLoaded = () => {
       if (!loadedNotified.current) {
         loadedNotified.current = true;
-        onLoaded?.();
+        onLoadedRef.current?.();
       }
     };
 
@@ -36,7 +41,7 @@ export function Scene({ onLoaded }: SceneProps) {
       window.removeEventListener('message', handleMessage);
       clearTimeout(fallbackTimer);
     };
-  }, [onLoaded]);
+  }, []);
 
   // Forward mouse movements to constellation canvas iframe ONLY when mouse is inside the hero
   useEffect(() => {

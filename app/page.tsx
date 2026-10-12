@@ -14,13 +14,87 @@ import { EventItem, FacultyAdvisorData } from '@/lib/types';
 
 export default function HomePage() {
   const [animationLoaded, setAnimationLoaded] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
   const [orbOffset, setOrbOffset] = useState({ x: 0, y: 0 });
   const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
 
   useEffect(() => {
-    getEvents().then(setAllEvents);
-    getFacultyAdvisor().then(setAdvisor);
+    let isMounted = true;
+    const minDisplayTime = 1300; // Ensures loader progress journey is smooth and visible
+    const maxSafetyTimeout = 4000; // Never keeps the screen blocked longer than 4s
+
+    // 1. Fetch Firestore Events & Advisor data
+    const dataPromise = Promise.all([
+      getEvents().catch((err) => {
+        console.warn('Events fetch fallback:', err);
+        return [];
+      }),
+      getFacultyAdvisor().catch((err) => {
+        console.warn('Advisor fetch fallback:', err);
+        return INITIAL_ADVISOR;
+      }),
+    ]).then(([events, adv]) => {
+      if (isMounted) {
+        setAllEvents(events || []);
+        if (adv) setAdvisor(adv);
+      }
+      return { events: events || [], advisor: adv };
+    });
+
+    // 2. Preload critical images (advisor image & top coverflow event thumbnails) + fonts
+    const assetsPromise = dataPromise.then(({ events, advisor: adv }) => {
+      const urls: string[] = [];
+      if (adv?.image) urls.push(adv.image);
+      if (events && events.length > 0) {
+        events.slice(0, 4).forEach((ev) => {
+          if (ev.image) urls.push(ev.image);
+        });
+      }
+
+      const imgLoaders = urls.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = src;
+          })
+      );
+
+      const fontsLoader =
+        typeof document !== 'undefined' && document.fonts
+          ? document.fonts.ready.catch(() => {})
+          : Promise.resolve();
+
+      return Promise.all([...imgLoaders, fontsLoader]);
+    });
+
+    // 3. Minimum display timer to prevent abrupt flashing
+    const minTimerPromise = new Promise((resolve) =>
+      setTimeout(resolve, minDisplayTime)
+    );
+
+    // 4. Combined readiness with safety timeout guarantee
+    let safetyTimer: NodeJS.Timeout;
+    const safetyPromise = new Promise((resolve) => {
+      safetyTimer = setTimeout(resolve, maxSafetyTimeout);
+    });
+
+    Promise.race([
+      Promise.all([dataPromise, assetsPromise, minTimerPromise]),
+      safetyPromise,
+    ]).then(() => {
+      if (isMounted) {
+        setDataReady(true);
+        setAnimationLoaded(true); // Guarantees the loading screen clears even if 3D scene was slow
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
 
@@ -45,7 +119,7 @@ export default function HomePage() {
   return (
     <>
       {/* Chapter Animation Loading Bar Screen */}
-      <LoadingScreen isLoaded={animationLoaded} />
+      <LoadingScreen isLoaded={animationLoaded && dataReady} />
 
       {/* Hero Section */}
       <section

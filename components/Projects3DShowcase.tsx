@@ -128,7 +128,7 @@ export default function Projects3DShowcase({ events }: Projects3DShowcaseProps) 
             background: 'var(--paper)',
           }}
         >
-          <div style={{ fontSize: '40px', marginBottom: '14px' }}>🚀</div>
+          
           <h3 style={{ fontSize: '22px', marginBottom: '8px' }}>No showcase events yet</h3>
           <p style={{ color: 'var(--muted)', maxWidth: '420px', margin: '0 auto 20px' }}>
             Head to the Admin panel → Events tab and add events or set a spotlight to showcase them here.

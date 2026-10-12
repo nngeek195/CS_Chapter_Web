@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface LoadingScreenProps {
   isLoaded?: boolean;
@@ -11,31 +11,51 @@ export default function LoadingScreen({ isLoaded = false }: LoadingScreenProps) 
   const [isDone, setIsDone] = useState(false);
   const [shouldRender, setShouldRender] = useState(true);
 
+  const currentRef = useRef(0);
+  const isLoadedRef = useRef(isLoaded);
+
+  useEffect(() => {
+    isLoadedRef.current = isLoaded;
+  }, [isLoaded]);
+
   useEffect(() => {
     let animFrameId: number;
-    let current = 0;
+    let completed = false;
+    const startTime = performance.now();
 
-    const tick = () => {
-      // If parent signals loaded, target is 100, otherwise approach 90
-      const target = isLoaded ? 100 : 90;
-      const step = isLoaded
-        ? Math.max(1, Math.round((100 - current) * 0.22))
-        : Math.max(1, Math.round((target - current) * 0.12));
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const loaded = isLoadedRef.current;
 
-      current = Math.min(target, current + step);
-      setProgress(current);
-
-      if (current < 100) {
-        animFrameId = requestAnimationFrame(tick);
+      if (!loaded) {
+        // Natural progress curve while UI components load:
+        // Starts briskly, rises smoothly through the 60s and 70s, then gently creeps up to ~93%
+        const simulated = Math.min(
+          93,
+          Math.floor((1 - Math.exp(-elapsed / 700)) * 88 + (elapsed / 4000) * 5)
+        );
+        currentRef.current = Math.max(currentRef.current, simulated);
       } else {
-        // Reached 100%, hold briefly for visual confirmation then fade out
+        // All UI components loaded: briskly accelerate from current position straight to 100%
+        const remaining = 100 - currentRef.current;
+        const step = Math.max(1, Math.round(remaining * 0.28));
+        currentRef.current = Math.min(100, currentRef.current + step);
+      }
+
+      setProgress(currentRef.current);
+
+      if (currentRef.current < 100) {
+        animFrameId = requestAnimationFrame(tick);
+      } else if (!completed) {
+        completed = true;
+        // Hold at 100% briefly for visual completion, then trigger fade-out
         setTimeout(() => {
           setIsDone(true);
-          // Remove from DOM after CSS fade-out finishes
+          // Remove from DOM after CSS transition finishes
           setTimeout(() => {
             setShouldRender(false);
           }, 700);
-        }, 220);
+        }, 180);
       }
     };
 
@@ -44,7 +64,7 @@ export default function LoadingScreen({ isLoaded = false }: LoadingScreenProps) 
     return () => {
       cancelAnimationFrame(animFrameId);
     };
-  }, [isLoaded]);
+  }, []);
 
   if (!shouldRender) {
     return null;
