@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import GalleryLightbox from '@/components/GalleryLightbox';
 import { getGalleryPhotos } from '@/lib/firestore';
-import { INITIAL_GALLERY } from '@/lib/seedData';
 import { GalleryPhoto } from '@/lib/types';
 
 export default function GalleryPage() {
-  const [photos, setPhotos] = useState<GalleryPhoto[]>(INITIAL_GALLERY);
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+
   const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(true);
 

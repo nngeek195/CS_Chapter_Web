@@ -7,20 +7,22 @@ import TiltCard from '@/components/TiltCard';
 import MagneticButton from '@/components/MagneticButton';
 import Scene from '@/components/Scene';
 import LoadingScreen from '@/components/LoadingScreen';
-import { getSpotlight, getFacultyAdvisor } from '@/lib/firestore';
-import { INITIAL_SPOTLIGHT, INITIAL_ADVISOR } from '@/lib/seedData';
-import { SpotlightData, FacultyAdvisorData } from '@/lib/types';
+import Projects3DShowcase from '@/components/Projects3DShowcase';
+import { getEvents, getFacultyAdvisor } from '@/lib/firestore';
+import { INITIAL_ADVISOR } from '@/lib/seedData';
+import { EventItem, FacultyAdvisorData } from '@/lib/types';
 
 export default function HomePage() {
   const [animationLoaded, setAnimationLoaded] = useState(false);
   const [orbOffset, setOrbOffset] = useState({ x: 0, y: 0 });
-  const [spotlight, setSpotlight] = useState<SpotlightData>(INITIAL_SPOTLIGHT);
+  const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
 
   useEffect(() => {
-    getSpotlight().then(setSpotlight);
+    getEvents().then(setAllEvents);
     getFacultyAdvisor().then(setAdvisor);
   }, []);
+
 
   const stats = [
     { end: 120, suffix: '+', label: 'Active members' },
@@ -93,88 +95,25 @@ export default function HomePage() {
       {/* Interactive Stats Band */}
       <StatsCounter stats={stats} />
 
-      {/* What We Do */}
-      <section className="section">
-        <div className="container split">
-          <div>
-            <div className="eyebrow mono">What we do</div>
-            <h2 className="section-title">Computer science with a community around it.</h2>
-            <p className="section-lead">
-              Our chapter connects academic foundation with real-world skills through student-led
-              workshops, global competitions, mentorship, and professional networking.
-            </p>
-          </div>
-
-          <div className="list-rows">
-            <Link className="list-row" href="/resources">
-              <span className="index">01</span>
-              <span>
-                <h4>Technical Workshops</h4>
-                <p>AI/ML, web technologies, cloud architectures, tools and hands-on coding.</p>
-              </span>
-              <span>→</span>
-            </Link>
-            <Link className="list-row" href="/events">
-              <span className="index">02</span>
-              <span>
-                <h4>Coding Competitions</h4>
-                <p>IEEEXtreme, CSIDC, university hackathons and competitive programming challenges.</p>
-              </span>
-              <span>→</span>
-            </Link>
-            <Link className="list-row" href="/leadership">
-              <span className="index">03</span>
-              <span>
-                <h4>Networking & Mentorship</h4>
-                <p>Industry leaders, alumni network, faculty guides and peer collaboration.</p>
-              </span>
-              <span>→</span>
-            </Link>
-            <Link className="list-row" href="/resources">
-              <span className="index">04</span>
-              <span>
-                <h4>Research & Certifications</h4>
-                <p>Talks, IEEE digital library access, academic publications, and certification pathways.</p>
-              </span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Spotlight */}
-      <section className="section" style={{ paddingTop: 0 }}>
+      {/* Projects Showcase */}
+      <section className="section showcase-section">
         <div className="container">
-          <div className="split" style={{ alignItems: 'end' }}>
+          <div className="split" style={{ alignItems: 'end', marginBottom: '36px' }}>
             <div>
               <div className="eyebrow mono">Featured / upcoming</div>
-              <h2 className="section-title">One strong spotlight, not an event dump.</h2>
+              <h2 className="section-title">Projects &amp; events showcase.</h2>
               <p className="section-lead">
-                Keeping the spotlight on what matters now, with the full archive preserved on the Events page.
+                Every initiative we run — workshops, competitions, flagship events — with our prime spotlight in the front and seamless 3D rolling access to all chapter projects.
               </p>
             </div>
             <Link className="link-arrow" href="/events">
               View all events →
             </Link>
           </div>
-
-          <div className="feature" style={{ marginTop: '42px' }}>
-            <img
-              src={spotlight.image}
-              alt={spotlight.title}
-            />
-            <div className="feature-overlay">
-              <div className="date-chip">{spotlight.tag}</div>
-              <h3>{spotlight.title}</h3>
-              <p>{spotlight.description}</p>
-              {spotlight.link && (
-                <Link href={spotlight.link} className="link-arrow" style={{ marginTop: '12px', display: 'inline-block' }}>
-                  Explore Spotlight →
-                </Link>
-              )}
-            </div>
-          </div>
         </div>
+
+        {/* 3D Rolling Coverflow Showcase */}
+        <Projects3DShowcase events={allEvents} />
       </section>
 
       {/* Why Join IEEE CS */}

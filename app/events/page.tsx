@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import EventFilterGrid from '@/components/EventFilterGrid';
 import { getEvents, getEventCategories } from '@/lib/firestore';
-import { INITIAL_EVENTS, INITIAL_CATEGORIES } from '@/lib/seedData';
+import { INITIAL_CATEGORIES } from '@/lib/seedData';
 import { EventItem, EventCategory } from '@/lib/types';
 
+
+
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [categories, setCategories] = useState<EventCategory[]>(INITIAL_CATEGORIES);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

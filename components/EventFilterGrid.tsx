@@ -17,12 +17,21 @@ export default function EventFilterGrid({
   categories = INITIAL_CATEGORIES,
 }: EventFilterGridProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState<number>(6);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleFilterChange = (key: string) => {
+    setActiveFilter(key);
+    setVisibleCount(6);
+  };
 
   const filteredEvents = events.filter((e) => {
     if (activeFilter === 'all') return true;
     return e.type.toLowerCase() === activeFilter.toLowerCase();
   });
+
+  const displayedEvents = filteredEvents.slice(0, visibleCount);
+  const hasMore = filteredEvents.length > visibleCount;
 
   const handleShare = async (item: EventItem, e: React.MouseEvent) => {
     e.preventDefault();
@@ -64,7 +73,7 @@ export default function EventFilterGrid({
           <button
             key={cat.key}
             className={`filter ${activeFilter === cat.key ? 'active' : ''}`}
-            onClick={() => setActiveFilter(cat.key)}
+            onClick={() => handleFilterChange(cat.key)}
           >
             {cat.label}
           </button>
@@ -76,64 +85,89 @@ export default function EventFilterGrid({
           <p>No events found for this category.</p>
         </div>
       ) : (
-        <div className="event-grid">
-          {filteredEvents.map((item) => (
-            <TiltCard key={item.id} className="event-card" style={{ padding: 0 }}>
-              <div className="event-media">
-                <img src={item.image} alt={item.title} />
-              </div>
-              <div className="event-body">
-                <div className="meta">
-                  <span>{item.date}</span>
-                  <span>{item.typeLabel}</span>
+        <>
+          <div className="event-grid">
+            {displayedEvents.map((item) => (
+              <TiltCard key={item.id} className="event-card" style={{ padding: 0 }}>
+                <div className="event-media">
+                  <img src={item.image} alt={item.title} />
                 </div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                <div className="tag-row">
-                  {item.tags.map((tag, tIdx) => (
-                    <span key={tIdx} className="tag-pill">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <div className="event-body">
+                  <div className="meta">
+                    <span>{item.date}</span>
+                    <span>{item.typeLabel}</span>
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                  <div className="tag-row">
+                    {item.tags.map((tag, tIdx) => (
+                      <span key={tIdx} className="tag-pill">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: '16px',
-                    paddingTop: '14px',
-                    borderTop: '1px solid var(--line)',
-                  }}
-                >
-                  {item.link ? (
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-arrow"
-                      style={{ fontSize: '12px' }}
-                    >
-                      Register / Learn ↗
-                    </a>
-                  ) : (
-                    <span></span>
-                  )}
-
-                  <button
-                    type="button"
-                    className="event-share-btn"
-                    onClick={(e) => handleShare(item, e)}
-                    title="Share Event"
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: '16px',
+                      paddingTop: '14px',
+                      borderTop: '1px solid var(--line)',
+                    }}
                   >
-                    {copiedId === item.id ? '✓ Link Copied' : '🔗 Share'}
-                  </button>
+                    {item.link ? (
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-arrow"
+                        style={{ fontSize: '12px' }}
+                      >
+                        Register / Learn ↗
+                      </a>
+                    ) : (
+                      <span></span>
+                    )}
+
+                    <button
+                      type="button"
+                      className="event-share-btn"
+                      onClick={(e) => handleShare(item, e)}
+                      title="Share Event"
+                    >
+                      {copiedId === item.id ? '✓ Link Copied' : '🔗 Share'}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </TiltCard>
-          ))}
-        </div>
+              </TiltCard>
+            ))}
+          </div>
+
+          {/* Show More / Show Less Button if > 6 events */}
+          {filteredEvents.length > 6 && (
+            <div style={{ textAlign: 'center', marginTop: '42px' }}>
+              {hasMore ? (
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => setVisibleCount((prev) => prev + 6)}
+                >
+                  Show More Events ({filteredEvents.length - visibleCount} more) ↓
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => setVisibleCount(6)}
+                >
+                  Show Less ↑
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

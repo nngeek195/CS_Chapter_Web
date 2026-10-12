@@ -576,6 +576,9 @@ p {
 .stat-band {
   background: var(--white);
   border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 5;
+  clear: both;
 }
 
 .stats {
@@ -621,15 +624,23 @@ p {
   box-shadow: var(--shadow);
 }
 
-.card {
+.card, .card-popup {
+  position: relative;
   padding: 28px;
-  transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), border-color 0.28s var(--ease);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s ease;
+  will-change: transform, box-shadow;
 }
 
-.card:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 24px 50px rgba(0, 59, 92, 0.12);
-  border-color: rgba(0, 98, 155, 0.22);
+.card:hover, .card-popup:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 48px rgba(0, 59, 92, 0.15), 0 8px 18px rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 98, 155, 0.32);
+  z-index: 5;
+}
+
+.card:active, .card-popup:active {
+  transform: translateY(-4px) scale(1.01);
+  transition-duration: 0.15s;
 }
 
 .card h3 {
@@ -1469,13 +1480,30 @@ footer a:hover {
 }
 
 @media (max-width: 620px) {
-  .g3, .g4, .event-grid, .resource-grid, .person-grid, .stats, .footer-grid {
+  .g3, .g4, .event-grid, .resource-grid, .person-grid, .footer-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Stats: 2×2 grid on mobile — stays compact and readable */
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .stat {
-    border-right: 0;
+    border-right: none;
     border-bottom: 1px solid var(--line);
   }
+
+  /* Remove right border from first of each row but keep bottom */
+  .stat:nth-child(odd) {
+    border-right: 1px solid var(--line);
+  }
+
+  /* Last row items: no bottom border */
+  .stat:nth-last-child(-n+2) {
+    border-bottom: none;
+  }
+
   .hero-copy {
     padding-bottom: 92px;
   }
@@ -1495,6 +1523,456 @@ footer a:hover {
   }
 }
 
+/* =============================================
+   3D Cover Flow Showcase (Projects & Events)
+   ============================================= */
+
+.showcase-section {
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  clear: both;
+  padding: clamp(70px, 8vw, 110px) 0 clamp(80px, 9vw, 120px);
+  background: var(--paper);
+}
+
+.coverflow-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 14px 0 32px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+/* 3D Perspective Rolling Stage */
+.coverflow-stage {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: clamp(480px, 56vh, 550px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+/* Base Card */
+.coverflow-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(290px, 32vw, 380px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 59, 92, 0.1);
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              filter 0.5s ease,
+              box-shadow 0.5s ease;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+/* Front Card (Spotlight / Active) */
+.coverflow-card-front {
+  transform: translate(-50%, -50%) translateZ(0) rotateY(0deg) scale(1);
+  z-index: 30;
+  opacity: 1;
+  filter: brightness(1);
+  box-shadow: 0 28px 70px rgba(0, 59, 92, 0.18), 0 0 0 1px rgba(0, 98, 155, 0.12);
+  cursor: default;
+}
+
+/* Extra radiant glow when front card is the Spotlight Event */
+.coverflow-card-spotlight.coverflow-card-front {
+  box-shadow: 0 30px 75px rgba(0, 59, 92, 0.22),
+              0 0 0 2px rgba(255, 108, 12, 0.6),
+              0 0 28px rgba(255, 108, 12, 0.18);
+}
+
+/* Right Back Card (Offset +1) */
+.coverflow-card-right {
+  transform: translate(calc(-50% + clamp(180px, 52%, 310px)), -50%)
+             translateZ(-160px)
+             rotateY(-30deg)
+             scale(0.85);
+  z-index: 20;
+  opacity: 0.72;
+  filter: brightness(0.84);
+}
+
+.coverflow-card-right:hover {
+  opacity: 0.9;
+  filter: brightness(0.96);
+  transform: translate(calc(-50% + clamp(180px, 52%, 310px)), -52%)
+             translateZ(-140px)
+             rotateY(-26deg)
+             scale(0.87);
+}
+
+/* Left Back Card (Offset -1) */
+.coverflow-card-left {
+  transform: translate(calc(-50% - clamp(180px, 52%, 310px)), -50%)
+             translateZ(-160px)
+             rotateY(30deg)
+             scale(0.85);
+  z-index: 20;
+  opacity: 0.72;
+  filter: brightness(0.84);
+}
+
+.coverflow-card-left:hover {
+  opacity: 0.9;
+  filter: brightness(0.96);
+  transform: translate(calc(-50% - clamp(180px, 52%, 310px)), -52%)
+             translateZ(-140px)
+             rotateY(26deg)
+             scale(0.87);
+}
+
+/* Farther Right Back Card (Offset +2) */
+.coverflow-card-far-right {
+  transform: translate(calc(-50% + clamp(300px, 86%, 520px)), -50%)
+             translateZ(-320px)
+             rotateY(-44deg)
+             scale(0.68);
+  z-index: 10;
+  opacity: 0.35;
+  filter: brightness(0.68);
+}
+
+/* Farther Left Back Card (Offset -2) */
+.coverflow-card-far-left {
+  transform: translate(calc(-50% - clamp(300px, 86%, 520px)), -50%)
+             translateZ(-320px)
+             rotateY(44deg)
+             scale(0.68);
+  z-index: 10;
+  opacity: 0.35;
+  filter: brightness(0.68);
+}
+
+/* Hidden cards beyond range */
+.coverflow-card-hidden {
+  transform: translate(-50%, -50%) translateZ(-460px) scale(0.5);
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Media Banner */
+.coverflow-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: linear-gradient(140deg, #063956, #00629B 54%, #FF6C0C);
+}
+
+.coverflow-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.coverflow-card-front:hover .coverflow-media img {
+  transform: scale(1.05);
+}
+
+.coverflow-media-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(140deg, #063956, #003B5C 54%, #006299);
+}
+
+/* Badge Rows */
+.coverflow-badge-row {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.coverflow-spotlight-badge {
+  background: linear-gradient(135deg, #FF6C0C, #e85500);
+  color: #fff;
+  font: 700 9.5px/1 'Open Sans', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(255, 108, 12, 0.45);
+}
+
+.coverflow-type-badge {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  font: 700 9px/1 'Open Sans', sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  margin-left: auto;
+}
+
+/* Body Content */
+.coverflow-body {
+  padding: 20px 22px 24px;
+}
+
+.coverflow-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.coverflow-date {
+  font: 600 11px/1 'Open Sans', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+
+.coverflow-status-pill {
+  font: 700 9px/1 'Open Sans', sans-serif;
+  color: var(--blue);
+  background: rgba(0, 98, 155, 0.08);
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.coverflow-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(16px, 1.7vw, 19px);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.coverflow-desc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.coverflow-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.coverflow-tag {
+  background: rgba(0, 98, 155, 0.08);
+  color: var(--blue);
+  font: 700 9px/1 'Open Sans', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.coverflow-action {
+  margin-top: 16px;
+}
+
+.coverflow-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 98, 155, 0.28);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.coverflow-cta-btn:hover {
+  background: var(--navy);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 59, 92, 0.35);
+}
+
+/* Controls & Indicator Row */
+.coverflow-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.coverflow-arrow-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition: all 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.coverflow-arrow-btn:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 98, 155, 0.28);
+}
+
+.coverflow-arrow-btn:active {
+  transform: scale(0.96);
+}
+
+.coverflow-indicators-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coverflow-snap-spotlight {
+  background: rgba(255, 108, 12, 0.1);
+  border: 1px solid rgba(255, 108, 12, 0.35);
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.coverflow-snap-spotlight:hover {
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 108, 12, 0.3);
+}
+
+.coverflow-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coverflow-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(16, 24, 32, 0.18);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.coverflow-dot:hover {
+  background: var(--blue);
+}
+
+.coverflow-dot.active {
+  width: 26px;
+  background: var(--blue);
+}
+
+.coverflow-dot.spotlight-dot {
+  box-shadow: 0 0 0 2px rgba(255, 108, 12, 0.4);
+}
+
+.coverflow-dot.spotlight-dot.active {
+  background: var(--orange);
+}
+
+.coverflow-hint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 16px;
+  letter-spacing: 0.14em;
+}
+
+/* Mobile Responsive Adaptations */
+@media (max-width: 620px) {
+  .coverflow-stage {
+    height: 480px;
+    perspective: 800px;
+  }
+
+  .coverflow-card {
+    width: clamp(260px, 80vw, 310px);
+  }
+
+  /* Compact 3D depth on mobile to prevent horizontal viewport clipping */
+  .coverflow-card-right {
+    transform: translate(calc(-50% + min(130px, 36%)), -50%)
+               translateZ(-130px)
+               rotateY(-22deg)
+               scale(0.82);
+  }
+
+  .coverflow-card-left {
+    transform: translate(calc(-50% - min(130px, 36%)), -50%)
+               translateZ(-130px)
+               rotateY(22deg)
+               scale(0.82);
+  }
+
+  .coverflow-card-far-right,
+  .coverflow-card-far-left {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .coverflow-arrow-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .coverflow-body {
+    padding: 16px 18px 20px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after {
     scroll-behavior: auto !important;
@@ -1503,6 +1981,9 @@ footer a:hover {
   }
   .hero-orb {
     animation: none !important;
+  }
+  .coverflow-card {
+    transition: none !important;
   }
 }
 

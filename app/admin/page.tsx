@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import ImageUploader from '@/components/ImageUploader';
 import {
-  SpotlightData,
   FacultyAdvisorData,
   EventItem,
   EventCategory,
@@ -17,8 +16,6 @@ import {
   ContactMessage,
 } from '@/lib/types';
 import {
-  getSpotlight,
-  updateSpotlight,
   getFacultyAdvisor,
   updateFacultyAdvisor,
   getEventCategories,
@@ -28,6 +25,7 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  setEventSpotlight,
   getCommittee,
   createCommitteeMember,
   updateCommitteeMember,
@@ -47,9 +45,10 @@ import {
   markContactMessageAsRead,
   deleteContactMessage,
 } from '@/lib/firestore';
+
 import { seedAllData } from '@/lib/seedData';
 
-type Tab = 'spotlight' | 'advisor' | 'events' | 'leadership' | 'resources' | 'gallery' | 'messages';
+type Tab = 'advisor' | 'events' | 'leadership' | 'resources' | 'gallery' | 'messages';
 
 const BATCH_OPTIONS = [
   '2021/2022 Batch',
@@ -64,12 +63,11 @@ export default function AdminDashboardPage() {
   const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<Tab>('spotlight');
+  const [activeTab, setActiveTab] = useState<Tab>('events');
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   // Data states
-  const [spotlight, setSpotlight] = useState<SpotlightData | null>(null);
   const [advisor, setAdvisor] = useState<FacultyAdvisorData | null>(null);
   const [categories, setCategories] = useState<EventCategory[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -97,6 +95,7 @@ export default function AdminDashboardPage() {
     link: '',
   });
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [modalEditEvent, setModalEditEvent] = useState<EventItem | null>(null);
 
   // Committee form
   const [committeeForm, setCommitteeForm] = useState<Partial<CommitteeMember>>({
@@ -139,7 +138,6 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const [
-        spotlightData,
         advisorData,
         categoriesData,
         eventsData,
@@ -149,7 +147,6 @@ export default function AdminDashboardPage() {
         galleryData,
         messagesData,
       ] = await Promise.all([
-        getSpotlight(),
         getFacultyAdvisor(),
         getEventCategories(),
         getEvents(),
@@ -160,7 +157,6 @@ export default function AdminDashboardPage() {
         getContactMessages(),
       ]);
 
-      setSpotlight(spotlightData);
       setAdvisor(advisorData);
       setCategories(categoriesData);
       setEvents(eventsData);
@@ -189,15 +185,15 @@ export default function AdminDashboardPage() {
     setTimeout(() => setSaveStatus(null), 3500);
   };
 
-  // 1. Spotlight Save
-  const handleSpotlightSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!spotlight) return;
+  // Set an event as the home-page spotlight
+  const handleSetSpotlight = async (eventId: string, eventTitle: string) => {
     try {
-      await updateSpotlight(spotlight);
-      showToast('Spotlight successfully updated!');
+      await setEventSpotlight(eventId);
+      // Optimistically update local state
+      setEvents((prev) => prev.map((ev) => ({ ...ev, isSpotlight: ev.id === eventId })));
+      showToast(`"${eventTitle}" is now the Featured Spotlight!`);
     } catch (err: any) {
-      alert('Error updating spotlight: ' + err.message);
+      alert('Error setting spotlight: ' + err.message);
     }
   };
 
@@ -284,9 +280,38 @@ export default function AdminDashboardPage() {
   };
 
   const handleEditEvent = (ev: EventItem) => {
-    setEditingEventId(ev.id);
-    setEventForm(ev);
-    window.scrollTo({ top: 300, behavior: 'smooth' });
+    setModalEditEvent({ ...ev });
+  };
+
+  // Quick lifecycle status switcher: Upcoming <-> Ongoing <-> Past
+  const handleQuickStatusChange = async (eventId: string, newType: string) => {
+    try {
+      const cat = categories.find((c) => c.key === newType);
+      const typeLabel = cat ? cat.label : newType.charAt(0).toUpperCase() + newType.slice(1);
+      await updateEvent(eventId, { type: newType, typeLabel });
+      setEvents((prev) =>
+        prev.map((ev) => (ev.id === eventId ? { ...ev, type: newType, typeLabel } : ev))
+      );
+      showToast(`Event status updated to "${typeLabel}"!`);
+    } catch (err: any) {
+      alert('Failed to update event status: ' + err.message);
+    }
+  };
+
+  // Full Edit Modal submit handler
+  const handleModalEventSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!modalEditEvent) return;
+    try {
+      await updateEvent(modalEditEvent.id, modalEditEvent);
+      setEvents((prev) =>
+        prev.map((ev) => (ev.id === modalEditEvent.id ? modalEditEvent : ev))
+      );
+      showToast(`Event "${modalEditEvent.title}" updated successfully!`);
+      setModalEditEvent(null);
+    } catch (err: any) {
+      alert('Error updating event: ' + err.message);
+    }
   };
 
   const handleDeleteEvent = async (id: string) => {
@@ -532,7 +557,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (authLoading || (loading && !spotlight)) {
+  if (authLoading || loading) {
     return (
       <div className="admin-loading-screen">
         <div className="spinner"></div>
@@ -583,17 +608,14 @@ export default function AdminDashboardPage() {
       <div className="admin-tabs-bar">
         <div className="container">
           <nav className="admin-tabs">
-            <button className={`admin-tab ${activeTab === 'spotlight' ? 'active' : ''}`} onClick={() => setActiveTab('spotlight')}>
-              🌟 Spotlight
+            <button className={`admin-tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>
+              📅 Events &amp; Categories ({events.length})
             </button>
             <button className={`admin-tab ${activeTab === 'advisor' ? 'active' : ''}`} onClick={() => setActiveTab('advisor')}>
               🎓 Faculty Advisor
             </button>
-            <button className={`admin-tab ${activeTab === 'events' ? 'active' : ''}`} onClick={() => setActiveTab('events')}>
-              📅 Events & Categories ({events.length})
-            </button>
             <button className={`admin-tab ${activeTab === 'leadership' ? 'active' : ''}`} onClick={() => setActiveTab('leadership')}>
-              👥 Leadership & Committees ({committee.length})
+              👥 Leadership &amp; Committees ({committee.length})
             </button>
             <button className={`admin-tab ${activeTab === 'resources' ? 'active' : ''}`} onClick={() => setActiveTab('resources')}>
               📚 Resources ({resources.length})
@@ -624,74 +646,6 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="container" style={{ padding: '36px 0 80px' }}>
-        {/* ==================================================== */}
-        {/* TAB 1: SPOTLIGHT */}
-        {/* ==================================================== */}
-        {activeTab === 'spotlight' && spotlight && (
-          <div className="admin-panel">
-            <div className="admin-panel-head">
-              <h2>Featured Spotlight</h2>
-              <p>Controls the hero card under "One strong spotlight, not an event dump" on the home page.</p>
-            </div>
-
-            <form onSubmit={handleSpotlightSave} className="admin-form">
-              <div className="form-group">
-                <label>Date Tag / Chip</label>
-                <input
-                  type="text"
-                  value={spotlight.tag}
-                  onChange={(e) => setSpotlight({ ...spotlight, tag: e.target.value })}
-                  placeholder="Flagship Series · 2026"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Spotlight Title</label>
-                <input
-                  type="text"
-                  value={spotlight.title}
-                  onChange={(e) => setSpotlight({ ...spotlight, title: e.target.value })}
-                  placeholder="Annual Tech Talk & Hackathon Series"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Spotlight Description</label>
-                <textarea
-                  rows={3}
-                  value={spotlight.description}
-                  onChange={(e) => setSpotlight({ ...spotlight, description: e.target.value })}
-                  placeholder="Brief synopsis of the featured flagship event..."
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Spotlight Image (Upload to Cloudinary)</label>
-                <ImageUploader
-                  currentImage={spotlight.image}
-                  onUpload={(url) => setSpotlight({ ...spotlight, image: url })}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Target Link (optional)</label>
-                <input
-                  type="text"
-                  value={spotlight.link || ''}
-                  onChange={(e) => setSpotlight({ ...spotlight, link: e.target.value })}
-                  placeholder="/events"
-                />
-              </div>
-
-              <button type="submit" className="btn primary" style={{ marginTop: '12px' }}>
-                Save Spotlight Changes
-              </button>
-            </form>
-          </div>
-        )}
 
         {/* ==================================================== */}
         {/* TAB 2: FACULTY ADVISOR */}
@@ -979,10 +933,45 @@ export default function AdminDashboardPage() {
 
             {/* Existing Events List */}
             <div className="admin-list-table">
-              <h3 style={{ marginBottom: '16px' }}>Existing Events ({events.length})</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                <h3 style={{ margin: 0 }}>Existing Events ({events.length})</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', background: 'rgba(255,166,0,0.08)', border: '1px solid rgba(255,166,0,0.3)', borderRadius: '10px', fontSize: '12px', color: '#92400e' }}>
+                  <span style={{ fontSize: '16px' }}>⭐</span>
+                  <span>Click <strong>Set as Spotlight</strong> on any event to feature it on the home page.</span>
+                </div>
+              </div>
               <div className="admin-grid-cards">
                 {events.map((ev) => (
-                  <div key={ev.id} className="admin-item-card">
+                  <div
+                    key={ev.id}
+                    className="admin-item-card"
+                    style={{
+                      outline: ev.isSpotlight ? '2px solid #f59e0b' : undefined,
+                      boxShadow: ev.isSpotlight ? '0 0 0 4px rgba(245,158,11,0.12)' : undefined,
+                      position: 'relative',
+                    }}
+                  >
+                    {ev.isSpotlight && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        zIndex: 2,
+                        background: '#f59e0b',
+                        color: '#fff',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        letterSpacing: '0.06em',
+                        padding: '3px 10px',
+                        borderRadius: '999px',
+                        textTransform: 'uppercase',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}>
+                        ⭐ Featured Spotlight
+                      </div>
+                    )}
                     <img src={ev.image} alt={ev.title} className="admin-card-thumb" />
                     <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--blue)', fontWeight: 600 }}>
@@ -991,9 +980,153 @@ export default function AdminDashboardPage() {
                       </div>
                       <h4 style={{ margin: '8px 0 6px', fontSize: '17px' }}>{ev.title}</h4>
                       <p style={{ fontSize: '13px', color: 'var(--muted)', flex: 1 }}>{ev.description}</p>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-                        <button onClick={() => handleEditEvent(ev)} className="btn secondary" style={{ fontSize: '12px', padding: '5px 10px' }}>
-                          Edit
+
+                      {/* Quick Status Lifecycle Switcher */}
+                      <div
+                        style={{
+                          marginTop: '12px',
+                          padding: '10px',
+                          background: 'var(--paper)',
+                          borderRadius: '10px',
+                          border: '1px solid var(--line)',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '8px',
+                            fontSize: '11px',
+                          }}
+                        >
+                          <span style={{ fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            Status:
+                          </span>
+                          <span
+                            style={{
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              fontSize: '10px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.06em',
+                              background:
+                                ev.type === 'ongoing'
+                                  ? 'rgba(16, 185, 129, 0.15)'
+                                  : ev.type === 'upcoming'
+                                  ? 'rgba(0, 98, 155, 0.12)'
+                                  : 'rgba(100, 116, 139, 0.14)',
+                              color:
+                                ev.type === 'ongoing'
+                                  ? '#047857'
+                                  : ev.type === 'upcoming'
+                                  ? 'var(--blue)'
+                                  : '#475569',
+                              border:
+                                ev.type === 'ongoing'
+                                  ? '1px solid rgba(16, 185, 129, 0.35)'
+                                  : '1px solid transparent',
+                            }}
+                          >
+                            ● {ev.type}
+                          </span>
+                        </div>
+
+                        {/* Quick Transition Action Buttons: Upcoming <-> Ongoing <-> Past */}
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {ev.type !== 'ongoing' && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatusChange(ev.id, 'ongoing')}
+                              className="btn secondary"
+                              style={{
+                                fontSize: '11px',
+                                padding: '4px 9px',
+                                background: 'rgba(16, 185, 129, 0.08)',
+                                borderColor: 'rgba(16, 185, 129, 0.4)',
+                                color: '#047857',
+                                fontWeight: 700,
+                              }}
+                              title="Move event to Ongoing"
+                            >
+                              ▶ Ongoing
+                            </button>
+                          )}
+
+                          {ev.type !== 'past' && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatusChange(ev.id, 'past')}
+                              className="btn secondary"
+                              style={{
+                                fontSize: '11px',
+                                padding: '4px 9px',
+                                background: 'rgba(100, 116, 139, 0.08)',
+                                borderColor: 'rgba(100, 116, 139, 0.4)',
+                                color: '#475569',
+                                fontWeight: 700,
+                              }}
+                              title="Move event to Past"
+                            >
+                              ✓ Past
+                            </button>
+                          )}
+
+                          {ev.type !== 'upcoming' && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStatusChange(ev.id, 'upcoming')}
+                              className="btn secondary"
+                              style={{
+                                fontSize: '11px',
+                                padding: '4px 9px',
+                                background: 'rgba(0, 98, 155, 0.08)',
+                                borderColor: 'rgba(0, 98, 155, 0.4)',
+                                color: 'var(--blue)',
+                                fontWeight: 700,
+                              }}
+                              title="Move event to Upcoming"
+                            >
+                              ↩ Upcoming
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
+                        {ev.isSpotlight ? (
+                          <button
+                            disabled
+                            className="btn secondary"
+                            style={{
+                              fontSize: '12px',
+                              padding: '5px 12px',
+                              background: 'rgba(245,158,11,0.1)',
+                              borderColor: '#f59e0b',
+                              color: '#92400e',
+                              cursor: 'default',
+                            }}
+                          >
+                            ⭐ Spotlight
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleSetSpotlight(ev.id, ev.title)}
+                            className="btn secondary"
+                            style={{ fontSize: '12px', padding: '5px 12px', borderColor: '#f59e0b', color: '#92400e' }}
+                            title="Show this event in the home-page spotlight section"
+                          >
+                            ☆ Set Spotlight
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleEditEvent(ev)}
+                          className="btn primary"
+                          style={{ fontSize: '12px', padding: '5px 12px' }}
+                          title="Open full event editor"
+                        >
+                          ✏ Edit Event
                         </button>
                         <button onClick={() => handleDeleteEvent(ev.id)} className="btn secondary" style={{ fontSize: '12px', padding: '5px 10px', color: '#dc2626' }}>
                           Delete
@@ -1004,6 +1137,163 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
             </div>
+
+            {/* Comprehensive Full Edit Modal for Published Events */}
+            {modalEditEvent && (
+              <div className="admin-modal-overlay">
+                <div
+                  className="admin-modal"
+                  style={{
+                    maxWidth: '680px',
+                    width: '95%',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    padding: '32px',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 style={{ margin: 0, fontSize: '22px' }}>Edit Published Event</h3>
+                    <button
+                      type="button"
+                      onClick={() => setModalEditEvent(null)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '22px',
+                        cursor: 'pointer',
+                        color: 'var(--muted)',
+                        padding: '4px',
+                      }}
+                      aria-label="Close edit modal"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleModalEventSave} className="admin-form">
+                    <div className="grid g2">
+                      <div className="form-group">
+                        <label>Event Title</label>
+                        <input
+                          type="text"
+                          value={modalEditEvent.title}
+                          onChange={(e) => setModalEditEvent({ ...modalEditEvent, title: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Status / Category</label>
+                        <select
+                          value={modalEditEvent.type}
+                          onChange={(e) => {
+                            const selectedKey = e.target.value;
+                            const matched = categories.find((c) => c.key === selectedKey);
+                            setModalEditEvent({
+                              ...modalEditEvent,
+                              type: selectedKey,
+                              typeLabel: matched ? matched.label : selectedKey.charAt(0).toUpperCase() + selectedKey.slice(1),
+                            });
+                          }}
+                          required
+                        >
+                          <option value="upcoming">Upcoming</option>
+                          <option value="ongoing">Ongoing</option>
+                          <option value="past">Past</option>
+                          {categories
+                            .filter((c) => !['all', 'upcoming', 'ongoing', 'past'].includes(c.key))
+                            .map((c) => (
+                              <option key={c.key} value={c.key}>
+                                {c.label}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid g2">
+                      <div className="form-group">
+                        <label>Display Label (e.g. Workshop, Hackathon)</label>
+                        <input
+                          type="text"
+                          value={modalEditEvent.typeLabel}
+                          onChange={(e) => setModalEditEvent({ ...modalEditEvent, typeLabel: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Event Date / Timeline</label>
+                        <input
+                          type="text"
+                          value={modalEditEvent.date}
+                          onChange={(e) => setModalEditEvent({ ...modalEditEvent, date: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Registration / External Link (optional)</label>
+                      <input
+                        type="text"
+                        value={modalEditEvent.link || ''}
+                        onChange={(e) => setModalEditEvent({ ...modalEditEvent, link: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Event Description</label>
+                      <textarea
+                        rows={3}
+                        value={modalEditEvent.description}
+                        onChange={(e) => setModalEditEvent({ ...modalEditEvent, description: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Banner Image (Upload via Cloudinary)</label>
+                      <ImageUploader
+                        currentImage={modalEditEvent.image || ''}
+                        onUpload={(url) => setModalEditEvent({ ...modalEditEvent, image: url })}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Tags (comma separated)</label>
+                      <input
+                        type="text"
+                        value={modalEditEvent.tags?.join(', ') || ''}
+                        onChange={(e) =>
+                          setModalEditEvent({
+                            ...modalEditEvent,
+                            tags: e.target.value
+                              .split(',')
+                              .map((t) => t.trim())
+                              .filter(Boolean),
+                          })
+                        }
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        onClick={() => setModalEditEvent(null)}
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn primary">
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

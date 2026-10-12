@@ -1,13 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import TypographyVortexCanvas from '@/components/TypographyVortexCanvas';
 import Logo from '../images/logo.png';
+import { getResources } from '@/lib/firestore';
 
 export default function Footer() {
   const pathname = usePathname();
+  const [hasResources, setHasResources] = useState(false);
+
+  useEffect(() => {
+    getResources()
+      .then((res) => {
+        setHasResources(Boolean(res && res.length > 0));
+      })
+      .catch(() => setHasResources(false));
+  }, []);
 
   if (pathname?.startsWith('/admin')) {
     return (
@@ -63,7 +73,7 @@ export default function Footer() {
           <div>
             <h4>Participate</h4>
             <Link href="/membership">Membership</Link>
-            <Link href="/resources">Resources</Link>
+            {hasResources && <Link href="/resources">Resources</Link>}
             <Link href="/contact">Contact</Link>
             <Link href="/admin">Portal Login</Link>
           </div>

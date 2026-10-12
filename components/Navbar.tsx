@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '../images/logo.png';
+import { getResources } from '@/lib/firestore';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasResources, setHasResources] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -26,6 +28,15 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Check if any resources exist in Firestore to toggle visibility in user navigation
+  useEffect(() => {
+    getResources()
+      .then((res) => {
+        setHasResources(Boolean(res && res.length > 0));
+      })
+      .catch(() => setHasResources(false));
+  }, []);
+
   // Do not show the common header on the admin dashboard
   if (pathname?.startsWith('/admin')) {
     return null;
@@ -36,7 +47,7 @@ export default function Navbar() {
     { name: 'About', href: '/about' },
     { name: 'Events', href: '/events' },
     { name: 'Leadership', href: '/leadership' },
-    { name: 'Resources', href: '/resources' },
+    ...(hasResources ? [{ name: 'Resources', href: '/resources' }] : []),
     { name: 'Membership', href: '/membership' },
     { name: 'Gallery', href: '/gallery' },
     { name: 'Contact', href: '/contact' },

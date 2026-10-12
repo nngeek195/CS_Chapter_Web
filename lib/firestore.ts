@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
-  SpotlightData,
   FacultyAdvisorData,
   EventItem,
   EventCategory,
@@ -24,35 +23,9 @@ import {
   ContactMessage,
 } from './types';
 import {
-  INITIAL_SPOTLIGHT,
   INITIAL_ADVISOR,
   INITIAL_CATEGORIES,
-  INITIAL_EVENTS,
-  INITIAL_COMMITTEE,
-  INITIAL_PAST_COMMITTEES,
-  INITIAL_RESOURCES,
-  INITIAL_GALLERY,
 } from './seedData';
-
-// ==========================================
-// SPOTLIGHT
-// ==========================================
-export async function getSpotlight(): Promise<SpotlightData> {
-  try {
-    const snap = await getDoc(doc(db, 'site_settings', 'spotlight'));
-    if (snap.exists()) {
-      return snap.data() as SpotlightData;
-    }
-  } catch (err) {
-    console.warn('Firestore spotlight fetch fallback:', err);
-  }
-  return INITIAL_SPOTLIGHT;
-}
-
-export async function updateSpotlight(data: Partial<SpotlightData>): Promise<void> {
-  const ref = doc(db, 'site_settings', 'spotlight');
-  await setDoc(ref, { ...data, updatedAt: Date.now() }, { merge: true });
-}
 
 // ==========================================
 // FACULTY ADVISOR
@@ -113,7 +86,7 @@ export async function getEvents(): Promise<EventItem[]> {
   } catch (err) {
     console.warn('Firestore events fetch fallback:', err);
   }
-  return INITIAL_EVENTS;
+  return [];
 }
 
 export async function createEvent(event: Omit<EventItem, 'id'>): Promise<EventItem> {
@@ -131,6 +104,35 @@ export async function deleteEvent(id: string): Promise<void> {
   await deleteDoc(doc(db, 'events', id));
 }
 
+/**
+ * Sets one event as the featured spotlight on the home page.
+ * Clears isSpotlight from every other event first, then flags the chosen one.
+ */
+export async function setEventSpotlight(spotlightId: string): Promise<void> {
+  const snap = await getDocs(collection(db, 'events'));
+  const batch = writeBatch(db);
+  snap.docs.forEach((d) => {
+    batch.update(d.ref, { isSpotlight: d.id === spotlightId });
+  });
+  await batch.commit();
+}
+
+/**
+ * Returns the single event currently marked as spotlight, or null.
+ */
+export async function getSpotlightEvent(): Promise<EventItem | null> {
+  try {
+    const snap = await getDocs(collection(db, 'events'));
+    const found = snap.docs.find((d) => d.data().isSpotlight === true);
+    if (found) return { id: found.id, ...found.data() } as EventItem;
+  } catch (err) {
+    console.warn('Firestore spotlight event fetch fallback:', err);
+  }
+  return null;
+}
+
+
+
 // ==========================================
 // LEADERSHIP (CURRENT COMMITTEE)
 // ==========================================
@@ -144,7 +146,7 @@ export async function getCommittee(): Promise<CommitteeMember[]> {
   } catch (err) {
     console.warn('Firestore committee fetch fallback:', err);
   }
-  return INITIAL_COMMITTEE;
+  return [];
 }
 
 export async function createCommitteeMember(member: Omit<CommitteeMember, 'id'>): Promise<CommitteeMember> {
@@ -226,7 +228,7 @@ export async function getPastCommittees(): Promise<PastCommittee[]> {
   } catch (err) {
     console.warn('Firestore past committees fetch fallback:', err);
   }
-  return INITIAL_PAST_COMMITTEES;
+  return [];
 }
 
 export async function createPastCommittee(year: string, members: string[]): Promise<PastCommittee> {
@@ -252,7 +254,7 @@ export async function getResources(): Promise<ResourceItem[]> {
   } catch (err) {
     console.warn('Firestore resources fetch fallback:', err);
   }
-  return INITIAL_RESOURCES;
+  return [];
 }
 
 export async function createResource(resource: Omit<ResourceItem, 'id'>): Promise<ResourceItem> {
@@ -283,7 +285,7 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   } catch (err) {
     console.warn('Firestore gallery fetch fallback:', err);
   }
-  return INITIAL_GALLERY;
+  return [];
 }
 
 export async function createGalleryPhoto(photo: Omit<GalleryPhoto, 'id'>): Promise<GalleryPhoto> {

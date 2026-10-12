@@ -23,7 +23,7 @@ export interface FacultyAdvisorData {
 
 export interface EventItem {
   id: string;
-  type: string; // 'upcoming' | 'past' | 'flagship' or custom category key
+  type: string; // 'upcoming' | 'ongoing' | 'past' | 'flagship' or custom category key
   typeLabel: string;
   date: string;
   title: string;
@@ -31,6 +31,7 @@ export interface EventItem {
   image: string;
   tags: string[];
   link?: string;
+  isSpotlight?: boolean; // if true, shown as the featured spotlight on the home page
   createdAt?: number;
 }
 

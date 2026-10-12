@@ -10,8 +10,6 @@ import {
 } from '@/lib/firestore';
 import {
   INITIAL_ADVISOR,
-  INITIAL_COMMITTEE,
-  INITIAL_PAST_COMMITTEES,
 } from '@/lib/seedData';
 import {
   FacultyAdvisorData,
@@ -19,10 +17,13 @@ import {
   PastCommittee,
 } from '@/lib/types';
 
+
+
 export default function LeadershipPage() {
   const [advisor, setAdvisor] = useState<FacultyAdvisorData>(INITIAL_ADVISOR);
-  const [committee, setCommittee] = useState<CommitteeMember[]>(INITIAL_COMMITTEE);
-  const [pastCommittees, setPastCommittees] = useState<PastCommittee[]>(INITIAL_PAST_COMMITTEES);
+  const [committee, setCommittee] = useState<CommitteeMember[]>([]);
+  const [pastCommittees, setPastCommittees] = useState<PastCommittee[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -38,7 +38,7 @@ export function Scene({ onLoaded }: SceneProps) {
     };
   }, [onLoaded]);
 
-  // Forward mouse movements to constellation canvas iframe
+  // Forward mouse movements to constellation canvas iframe ONLY when mouse is inside the hero
   useEffect(() => {
     let ticking = false;
 
@@ -46,7 +46,32 @@ export function Scene({ onLoaded }: SceneProps) {
       return containerRef.current?.querySelector('iframe') || null;
     };
 
+    const handleMouseLeave = () => {
+      const iframe = getIframe();
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'pointer-leave' }, '*');
+      }
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const hero = container.closest('.hero');
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+
+      // Check if mouse pointer is inside the hero boundaries
+      const isInsideHero =
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom &&
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right;
+
+      if (!isInsideHero) {
+        handleMouseLeave();
+        return;
+      }
+
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
@@ -57,7 +82,7 @@ export function Scene({ onLoaded }: SceneProps) {
             {
               type: 'pointer-move',
               clientX: e.clientX,
-              clientY: e.clientY,
+              clientY: e.clientY - rect.top,
             },
             '*'
           );
@@ -65,18 +90,25 @@ export function Scene({ onLoaded }: SceneProps) {
       });
     };
 
-    const handleMouseLeave = () => {
-      const iframe = getIframe();
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: 'pointer-leave' }, '*');
+    // When scrolling out of hero view, send pointer-leave
+    const handleScroll = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const hero = container.closest('.hero');
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) {
+        handleMouseLeave();
       }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);

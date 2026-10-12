@@ -49,7 +49,7 @@ export default function ContactForm() {
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g. Nirmal Perera"
+          placeholder="e.g. Niranga Nayanajith"
         />
       </div>
 

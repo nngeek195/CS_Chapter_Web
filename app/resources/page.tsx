@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import TiltCard from '@/components/TiltCard';
 import { getResources } from '@/lib/firestore';
-import { INITIAL_RESOURCES } from '@/lib/seedData';
 import { ResourceItem } from '@/lib/types';
 
 export default function ResourcesPage() {
-  const [resources, setResources] = useState<ResourceItem[]>(INITIAL_RESOURCES);
+  const [resources, setResources] = useState<ResourceItem[]>([]);
+
   const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -38,55 +38,58 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="container">
-          <div className="eyebrow mono">Curated Materials</div>
-          <h2 className="section-title">Knowledge repository.</h2>
+      {/* Only show the Knowledge repository section if resources exist */}
+      {(loading || resources.length > 0) && (
+        <section className="section">
+          <div className="container">
+            <div className="eyebrow mono">Curated Materials</div>
+            <h2 className="section-title">Knowledge repository.</h2>
 
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <>
-              <div className="resource-grid" style={{ marginTop: '38px' }}>
-                {displayedResources.map((item) => (
-                  <TiltCard key={item.id} className="resource">
-                    <div className="resource-thumb">
-                      <span>{item.category}</span>
-                    </div>
-                    <div className="resource-body">
-                      <h3>{item.title}</h3>
-                      <p style={{ marginTop: '10px' }}>{item.description}</p>
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="link-arrow"
-                        style={{ marginTop: '16px', display: 'inline-block' }}
-                      >
-                        Access Resource ↗
-                      </a>
-                    </div>
-                  </TiltCard>
-                ))}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <div className="spinner"></div>
               </div>
-
-              {hasMore && (
-                <div style={{ textAlign: 'center', marginTop: '36px' }}>
-                  <button
-                    type="button"
-                    className="btn primary"
-                    onClick={() => setShowAll(!showAll)}
-                  >
-                    {showAll ? 'Show Less ↑' : `Explore More Resources (${resources.length - 6} more) ↓`}
-                  </button>
+            ) : (
+              <>
+                <div className="resource-grid" style={{ marginTop: '38px' }}>
+                  {displayedResources.map((item) => (
+                    <TiltCard key={item.id} className="resource">
+                      <div className="resource-thumb">
+                        <span>{item.category}</span>
+                      </div>
+                      <div className="resource-body">
+                        <h3>{item.title}</h3>
+                        <p style={{ marginTop: '10px' }}>{item.description}</p>
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-arrow"
+                          style={{ marginTop: '16px', display: 'inline-block' }}
+                        >
+                          Access Resource ↗
+                        </a>
+                      </div>
+                    </TiltCard>
+                  ))}
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+
+                {hasMore && (
+                  <div style={{ textAlign: 'center', marginTop: '36px' }}>
+                    <button
+                      type="button"
+                      className="btn primary"
+                      onClick={() => setShowAll(!showAll)}
+                    >
+                      {showAll ? 'Show Less ↑' : `Explore More Resources (${resources.length - 6} more) ↓`}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* IEEE Digital Library Access */}
       <section className="section section-dark">
