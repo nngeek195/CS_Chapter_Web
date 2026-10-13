@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import ImageUploader from '@/components/ImageUploader';
+import ZipGalleryUploader from '@/components/ZipGalleryUploader';
 import {
   FacultyAdvisorData,
   EventItem,
@@ -132,6 +133,7 @@ export default function AdminDashboardPage() {
     alt: '',
     caption: '',
   });
+  const [galleryUploadMode, setGalleryUploadMode] = useState<'single' | 'zip'>('single');
 
   // Load all data
   const loadAll = async () => {
@@ -1676,40 +1678,75 @@ export default function AdminDashboardPage() {
               <p>Upload photos via Cloudinary. Public gallery displays 6 at a time with "Explore More Moments".</p>
             </div>
 
-            <form onSubmit={handleGallerySubmit} className="admin-form" style={{ marginBottom: '40px' }}>
-              <div className="form-group">
-                <label>Photo Caption / Title</label>
-                <input
-                  type="text"
-                  value={galleryForm.caption || ''}
-                  onChange={(e) => setGalleryForm({ ...galleryForm, caption: e.target.value })}
-                  placeholder="e.g. Hands-on Machine Learning Workshop"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Alt Text (for accessibility)</label>
-                <input
-                  type="text"
-                  value={galleryForm.alt || ''}
-                  onChange={(e) => setGalleryForm({ ...galleryForm, alt: e.target.value })}
-                  placeholder="Students collaborating at Sabaragamuwa University..."
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Select Photo (Upload via Cloudinary)</label>
-                <ImageUploader
-                  currentImage={galleryForm.src || ''}
-                  onUpload={(url) => setGalleryForm({ ...galleryForm, src: url })}
-                />
-              </div>
-
-              <button type="submit" className="btn primary">
-                + Add to Gallery
+            {/* Upload Mode Switcher */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '28px',
+                borderBottom: '1px solid var(--line, #e2e8f0)',
+                paddingBottom: '16px',
+              }}
+            >
+              <button
+                type="button"
+                className={`btn ${galleryUploadMode === 'single' ? 'primary' : 'secondary'}`}
+                onClick={() => setGalleryUploadMode('single')}
+                style={{ fontSize: '13px' }}
+              >
+                📷 Single Photo Upload
               </button>
-            </form>
+              <button
+                type="button"
+                className={`btn ${galleryUploadMode === 'zip' ? 'primary' : 'secondary'}`}
+                onClick={() => setGalleryUploadMode('zip')}
+                style={{ fontSize: '13px' }}
+              >
+                📦 Bulk ZIP Upload
+              </button>
+            </div>
+
+            {galleryUploadMode === 'zip' ? (
+              <ZipGalleryUploader
+                onPhotoAdded={(photo) => setGallery((prev) => [photo, ...prev])}
+                showToast={showToast}
+              />
+            ) : (
+              <form onSubmit={handleGallerySubmit} className="admin-form" style={{ marginBottom: '40px' }}>
+                <div className="form-group">
+                  <label>Photo Caption / Title</label>
+                  <input
+                    type="text"
+                    value={galleryForm.caption || ''}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, caption: e.target.value })}
+                    placeholder="e.g. Hands-on Machine Learning Workshop"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Alt Text (for accessibility)</label>
+                  <input
+                    type="text"
+                    value={galleryForm.alt || ''}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, alt: e.target.value })}
+                    placeholder="Students collaborating at Sabaragamuwa University..."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Select Photo (Upload via Cloudinary)</label>
+                  <ImageUploader
+                    currentImage={galleryForm.src || ''}
+                    onUpload={(url) => setGalleryForm({ ...galleryForm, src: url })}
+                  />
+                </div>
+
+                <button type="submit" className="btn primary">
+                  + Add to Gallery
+                </button>
+              </form>
+            )}
 
             <h3>Uploaded Gallery Photos ({gallery.length})</h3>
             <div className="admin-grid-cards" style={{ marginTop: '16px' }}>
