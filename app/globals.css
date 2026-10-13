@@ -418,8 +418,10 @@ p {
   z-index: 1;
   pointer-events: none;
   overflow: hidden;
+  background: #070914;
 }
 
+.shader-frame canvas,
 .shader-frame iframe {
   width: 100%;
   height: 100%;
