@@ -29,7 +29,7 @@ export default function EventsPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            03 · EVENTS
+            02 · EVENTS
           </div>
           <h1>Events are the engine.</h1>
           <p>

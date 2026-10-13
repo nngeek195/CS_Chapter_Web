@@ -28,7 +28,7 @@ export default function ResourcesPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            04 · RESOURCES
+            07 · RESOURCES
           </div>
           <h1>Learn, build, and publish.</h1>
           <p>

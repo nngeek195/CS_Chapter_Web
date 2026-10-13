@@ -39,7 +39,7 @@ export default function MembershipPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            06 · MEMBERSHIP
+            04 · MEMBERSHIP
           </div>
           <h1>Join the learning loop.</h1>
           <p>

@@ -1564,44 +1564,46 @@ footer a:hover {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: clamp(290px, 32vw, 380px);
+  width: clamp(320px, 36vw, 440px);
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 16px 40px rgba(0, 59, 92, 0.1);
-  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
-              opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
-              filter 0.5s ease,
-              box-shadow 0.5s ease;
+  transition:
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    filter 0.5s ease,
+    box-shadow 0.5s ease;
   will-change: transform, opacity;
   transform-style: preserve-3d;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
-/* Front Card (Spotlight / Active) */
+/* Front / Spotlight Card */
 .coverflow-card-front {
   transform: translate(-50%, -50%) translateZ(0) rotateY(0deg) scale(1);
   z-index: 30;
   opacity: 1;
   filter: brightness(1);
-  box-shadow: 0 28px 70px rgba(0, 59, 92, 0.18), 0 0 0 1px rgba(0, 98, 155, 0.12);
+  box-shadow:
+    0 28px 70px rgba(0, 59, 92, 0.18),
+    0 0 0 1px rgba(0, 98, 155, 0.12);
   cursor: default;
 }
 
-/* Extra radiant glow when front card is the Spotlight Event */
 .coverflow-card-spotlight.coverflow-card-front {
-  box-shadow: 0 30px 75px rgba(0, 59, 92, 0.22),
-              0 0 0 2px rgba(255, 108, 12, 0.6),
-              0 0 28px rgba(255, 108, 12, 0.18);
+  box-shadow:
+    0 30px 75px rgba(0, 59, 92, 0.22),
+    0 0 0 2px rgba(255, 108, 12, 0.6),
+    0 0 28px rgba(255, 108, 12, 0.18);
 }
 
-/* Right Back Card (Offset +1) */
+/* Side Card Offset */
 .coverflow-card-right {
-  transform: translate(calc(-50% + clamp(180px, 52%, 310px)), -50%)
-             translateZ(-160px)
-             rotateY(-30deg)
-             scale(0.85);
+  transform: translate(calc(-50% + clamp(205px, 40vw, 350px)), -50%)
+    translateZ(-160px) rotateY(-30deg) scale(0.85);
   z-index: 20;
   opacity: 0.72;
   filter: brightness(0.84);
@@ -1610,18 +1612,13 @@ footer a:hover {
 .coverflow-card-right:hover {
   opacity: 0.9;
   filter: brightness(0.96);
-  transform: translate(calc(-50% + clamp(180px, 52%, 310px)), -52%)
-             translateZ(-140px)
-             rotateY(-26deg)
-             scale(0.87);
+  transform: translate(calc(-50% + clamp(205px, 40vw, 350px)), -52%)
+    translateZ(-140px) rotateY(-26deg) scale(0.87);
 }
 
-/* Left Back Card (Offset -1) */
 .coverflow-card-left {
-  transform: translate(calc(-50% - clamp(180px, 52%, 310px)), -50%)
-             translateZ(-160px)
-             rotateY(30deg)
-             scale(0.85);
+  transform: translate(calc(-50% - clamp(205px, 40vw, 350px)), -50%)
+    translateZ(-160px) rotateY(30deg) scale(0.85);
   z-index: 20;
   opacity: 0.72;
   filter: brightness(0.84);
@@ -1630,35 +1627,28 @@ footer a:hover {
 .coverflow-card-left:hover {
   opacity: 0.9;
   filter: brightness(0.96);
-  transform: translate(calc(-50% - clamp(180px, 52%, 310px)), -52%)
-             translateZ(-140px)
-             rotateY(26deg)
-             scale(0.87);
+  transform: translate(calc(-50% - clamp(205px, 40vw, 350px)), -52%)
+    translateZ(-140px) rotateY(26deg) scale(0.87);
 }
 
-/* Farther Right Back Card (Offset +2) */
+/* Far Side Cards */
 .coverflow-card-far-right {
-  transform: translate(calc(-50% + clamp(300px, 86%, 520px)), -50%)
-             translateZ(-320px)
-             rotateY(-44deg)
-             scale(0.68);
+  transform: translate(calc(-50% + clamp(330px, 68vw, 590px)), -50%)
+    translateZ(-320px) rotateY(-44deg) scale(0.68);
   z-index: 10;
   opacity: 0.35;
   filter: brightness(0.68);
 }
 
-/* Farther Left Back Card (Offset -2) */
 .coverflow-card-far-left {
-  transform: translate(calc(-50% - clamp(300px, 86%, 520px)), -50%)
-             translateZ(-320px)
-             rotateY(44deg)
-             scale(0.68);
+  transform: translate(calc(-50% - clamp(330px, 68vw, 590px)), -50%)
+    translateZ(-320px) rotateY(44deg) scale(0.68);
   z-index: 10;
   opacity: 0.35;
   filter: brightness(0.68);
 }
 
-/* Hidden cards beyond range */
+/* Hidden Cards */
 .coverflow-card-hidden {
   transform: translate(-50%, -50%) translateZ(-460px) scale(0.5);
   z-index: 0;
@@ -1669,7 +1659,7 @@ footer a:hover {
 /* Media Banner */
 .coverflow-media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: linear-gradient(140deg, #063956, #00629B 54%, #FF6C0C);
 }
@@ -1690,6 +1680,83 @@ footer a:hover {
   width: 100%;
   height: 100%;
   background: linear-gradient(140deg, #063956, #003B5C 54%, #006299);
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .coverflow-card {
+    width: min(76vw, 360px);
+    border-radius: 20px;
+  }
+
+  .coverflow-card-right {
+    transform: translate(calc(-50% + 30vw), -50%)
+      translateZ(-130px) rotateY(-25deg) scale(0.78);
+  }
+
+  .coverflow-card-left {
+    transform: translate(calc(-50% - 30vw), -50%)
+      translateZ(-130px) rotateY(25deg) scale(0.78);
+  }
+
+  .coverflow-card-right:hover {
+    transform: translate(calc(-50% + 30vw), -52%)
+      translateZ(-120px) rotateY(-22deg) scale(0.8);
+  }
+
+  .coverflow-card-left:hover {
+    transform: translate(calc(-50% - 30vw), -52%)
+      translateZ(-120px) rotateY(22deg) scale(0.8);
+  }
+
+  .coverflow-card-far-right {
+    transform: translate(calc(-50% + 55vw), -50%)
+      translateZ(-260px) rotateY(-38deg) scale(0.6);
+  }
+
+  .coverflow-card-far-left {
+    transform: translate(calc(-50% - 55vw), -50%)
+      translateZ(-260px) rotateY(38deg) scale(0.6);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .coverflow-card {
+    width: 84vw;
+    max-width: 340px;
+    border-radius: 18px;
+  }
+
+  .coverflow-card-right {
+    transform: translate(calc(-50% + 34vw), -50%)
+      translateZ(-100px) rotateY(-18deg) scale(0.72);
+  }
+
+  .coverflow-card-left {
+    transform: translate(calc(-50% - 34vw), -50%)
+      translateZ(-100px) rotateY(18deg) scale(0.72);
+  }
+
+  .coverflow-card-right:hover {
+    transform: translate(calc(-50% + 34vw), -52%)
+      translateZ(-90px) rotateY(-16deg) scale(0.74);
+  }
+
+  .coverflow-card-left:hover {
+    transform: translate(calc(-50% - 34vw), -52%)
+      translateZ(-90px) rotateY(16deg) scale(0.74);
+  }
+
+  .coverflow-card-far-right {
+    transform: translate(calc(-50% + 50vw), -50%)
+      translateZ(-220px) rotateY(-30deg) scale(0.52);
+  }
+
+  .coverflow-card-far-left {
+    transform: translate(calc(-50% - 50vw), -50%)
+      translateZ(-220px) rotateY(30deg) scale(0.52);
+  }
 }
 
 /* Badge Rows */

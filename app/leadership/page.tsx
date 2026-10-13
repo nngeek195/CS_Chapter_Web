@@ -42,7 +42,7 @@ export default function LeadershipPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            02 · LEADERSHIP
+            03 · LEADERSHIP
           </div>
           <h1>People behind the chapter.</h1>
           <p>

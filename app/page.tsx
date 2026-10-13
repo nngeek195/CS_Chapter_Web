@@ -101,7 +101,7 @@ export default function HomePage() {
   const stats = [
     { end: 120, suffix: '+', label: 'Active members' },
     { end: 24, suffix: '+', label: 'Events & sessions' },
-    { end: 3, suffix: '+', label: 'Years active' },
+    { end: 2, suffix: '+', label: 'Years active' },
     { end: 12, suffix: '+', label: 'Workshops delivered' },
   ];
 

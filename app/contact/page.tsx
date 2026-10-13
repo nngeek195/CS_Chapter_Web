@@ -13,7 +13,7 @@ export default function ContactPage() {
       <section className="page-hero">
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#74c0ea' }}>
-            07 · CONTACT
+            06 · CONTACT
           </div>
           <h1>Get in touch with us.</h1>
           <p>

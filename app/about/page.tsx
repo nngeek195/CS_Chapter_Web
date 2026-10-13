@@ -34,16 +34,15 @@ export default function AboutPage() {
           <div className="surface card">
             <h3>Our Mission</h3>
             <p style={{ marginTop: '8px' }}>
-              Create a vibrant, practical community around computer science through technical learning,
-              competitive programming, collaborative open-source projects, and deep exposure to cutting-edge
-              industry and academic research.
+              To empower students through technical learning, hands-on projects, industry exposure, competitive programming and 
+              collaborative initiatives while fostering an inclusive community of 
+              innovators, problem-solvers and future computing professionals.
             </p>
 
             <h3 style={{ marginTop: '28px' }}>Our Vision</h3>
             <p style={{ marginTop: '8px' }}>
-              Become a premier student platform connecting computing curriculum with real-world impact,
-              fostering future software engineers, researchers, and tech pioneers with an inclusive,
-              sustainable chapter culture.
+              To build a leading student computing community that inspires innovation, 
+              nurtures future technology leaders and connects academic knowledge with real-world impact.
             </p>
           </div>
         </div>
