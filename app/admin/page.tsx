@@ -52,6 +52,7 @@ import { seedAllData } from '@/lib/seedData';
 type Tab = 'advisor' | 'events' | 'leadership' | 'resources' | 'gallery' | 'messages';
 
 const BATCH_OPTIONS = [
+  "2020/2021 Batch",
   '2021/2022 Batch',
   '2022/2023 Batch',
   '2023/2024 Batch',
@@ -1402,7 +1403,7 @@ export default function AdminDashboardPage() {
                 <div className="form-group">
                   <label>Batch (Select or Type)</label>
                   <select
-                    value={committeeForm.batch || '2023/2024 Batch'}
+                    value={committeeForm.batch || '2022/2023 Batch'}
                     onChange={(e) => setCommitteeForm({ ...committeeForm, batch: e.target.value })}
                   >
                     {BATCH_OPTIONS.map((b) => (
