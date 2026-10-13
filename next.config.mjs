@@ -18,6 +18,16 @@ const nextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/secret',
+        destination: '/developers',
+        permanent: false,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

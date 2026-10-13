@@ -191,7 +191,7 @@ export default function HomePage() {
       </section>
 
       {/* Why Join IEEE CS */}
-      <section className="section section-dark">
+      <section className="section section-dark why-join-section">
         <div className="container">
           <div className="eyebrow mono">Why join IEEE CS</div>
           <h2 className="section-title">More than a membership badge.</h2>

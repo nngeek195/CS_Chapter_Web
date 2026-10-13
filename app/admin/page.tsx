@@ -722,7 +722,7 @@ export default function AdminDashboardPage() {
                     type="email"
                     value={advisor.email || ''}
                     onChange={(e) => setAdvisor({ ...advisor, email: e.target.value })}
-                    placeholder="ieeecs@sab.ac.lk"
+                    placeholder="ieeecssusl@gmail.com"
                   />
                 </div>
 

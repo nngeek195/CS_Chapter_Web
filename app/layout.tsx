@@ -2,18 +2,23 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import DeveloperConsoleListener from '@/components/DeveloperConsoleListener';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ieeecs-susl.ac.lk'),
   title: {
     default: 'IEEE CS SUSL — IEEE Computer Society Chapter',
-    template: '%s — IEEE CS SUSL',
+    template: '%s',
   },
   description:
     'IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka. Empowering students with computing knowledge, workshops, hackathons, and research exposure.',
   keywords: [
     'IEEE CS',
+    'Computer Society susl',
+    'IEEE Computer Society Chapter',
+    'IEEE Computer Society at SUSL',
+    'IEEE Computer Society SUSL',
     'IEEE Computer Society',
     'SUSL',
     'Sabaragamuwa University of Sri Lanka',
@@ -54,6 +59,7 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
+          <DeveloperConsoleListener />
           <Navbar />
           <main>{children}</main>
           <Footer />
