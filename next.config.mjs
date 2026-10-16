@@ -42,11 +42,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://static.cloudflareinsights.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' blob: data: https://images.unsplash.com https://firebasestorage.googleapis.com https://res.cloudinary.com",
-              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://api.cloudinary.com",
+              "img-src 'self' blob: data: https://images.unsplash.com https://firebasestorage.googleapis.com https://res.cloudinary.com https://www.google-analytics.com",
+              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com",
               // Allow srcdoc iframes and OpenStreetMap embed
               "frame-src 'self' blob: data: https://www.openstreetmap.org",
               "worker-src 'self' blob:",

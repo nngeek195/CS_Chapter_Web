@@ -111,7 +111,7 @@ export default function DevelopersPage() {
               <span style={{ marginLeft: '12px', fontSize: '11px', letterSpacing: '0.1em' }}>bash ~ ieee-cs-susl/dev-chamber</span>
             </div>
             <div style={{ lineHeight: 1.8 }}>
-              <span style={{ color: '#68cdf9' }}>$</span> <span style={{ color: '#fff' }}>curl -s https://ieeecs-susl.ac.lk/api/developers</span><br />
+              <span style={{ color: '#68cdf9' }}>$</span> <span style={{ color: '#fff' }}>curl -s https://cschaptersusl.org/api/developers</span><br />
               <span style={{ color: '#27c93f' }}>[200 OK]</span> Loaded developer profiles:<br />
               &nbsp;&nbsp;→ <span style={{ color: '#FF6C0C', fontWeight: 'bold' }}>Niranga Nayanajith</span> <span style={{ opacity: 0.7 }}>[Lead Developer]</span><br />
               &nbsp;&nbsp;→ <span style={{ color: '#FF6C0C', fontWeight: 'bold' }}>Kaveesha Sandeepani</span> <span style={{ opacity: 0.7 }}>[Front end Developer]</span><br />

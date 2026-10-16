@@ -4,7 +4,17 @@ import ContactForm from '@/components/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Contact IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka.',
+  description:
+    'Get in touch with the IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka. Reach out for collaborations, membership enquiries, event sponsorship or general questions.',
+  alternates: {
+    canonical: '/contact',
+  },
+  openGraph: {
+    title: 'Contact | IEEE CS SUSL',
+    description:
+      'Get in touch with the IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka.',
+    url: '/contact',
+  },
 };
 
 export default function ContactPage() {

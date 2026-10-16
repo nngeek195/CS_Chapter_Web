@@ -4,7 +4,17 @@ import TiltCard from '@/components/TiltCard';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Learn about the IEEE Computer Society Chapter at Sabaragamuwa University of Sri Lanka.',
+  description:
+    'Learn about the IEEE Computer Society Student Branch Chapter at Sabaragamuwa University of Sri Lanka — our mission, vision, history, and relationship with IEEE.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About | IEEE CS SUSL',
+    description:
+      'Learn about the IEEE Computer Society Student Branch Chapter at Sabaragamuwa University of Sri Lanka — our mission, vision, history, and relationship with IEEE.',
+    url: '/about',
+  },
 };
 
 export default function AboutPage() {
