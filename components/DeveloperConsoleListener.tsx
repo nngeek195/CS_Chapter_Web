@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
+// The hidden path — intentionally obscure
+const DEV_CHAMBER_PATH = '/login/developer';
+
 export default function DeveloperConsoleListener() {
   const router = useRouter();
   const pathname = usePathname();
@@ -11,7 +14,7 @@ export default function DeveloperConsoleListener() {
   const wasOpenRef = useRef(false);
 
   useEffect(() => {
-    const isSecretPage = pathname === '/developers' || pathname?.startsWith('/developers');
+    const isSecretPage = pathname === DEV_CHAMBER_PATH || pathname?.startsWith(DEV_CHAMBER_PATH);
 
     // Styled console banners
     const printDeveloperMessage = (isTeleporting = false) => {
@@ -33,7 +36,7 @@ export default function DeveloperConsoleListener() {
         `│ 🔗 LinkedIn: https://www.linkedin.com/in/kaveesha-sandeepani/│\n` +
         `└${subLine}┘\n\n` +
         (isTeleporting
-          ? `%c✨ Teleporting to the Secret Developer Chamber (/developers)... Hang on!\n`
+          ? `%c✨ Teleporting to the Secret Developer Chamber... Hang on!\n`
           : `%c⭐ Welcome to the Secret Developer Chamber! Connect with us on LinkedIn.\n`),
         'color: #00629B; font-size: 13px; font-weight: bold; font-family: monospace;',
         'color: #FF6C0C; font-size: 13px; font-weight: 600; font-family: monospace;',
@@ -49,7 +52,7 @@ export default function DeveloperConsoleListener() {
 
     const triggerRedirect = () => {
       if (isRedirectingRef.current) return;
-      if (pathname === '/developers' || pathname?.startsWith('/developers')) return;
+      if (pathname === DEV_CHAMBER_PATH || pathname?.startsWith(DEV_CHAMBER_PATH)) return;
 
       const lastRedirect = sessionStorage.getItem('devtools_last_redirect');
       const now = Date.now();
@@ -70,7 +73,7 @@ export default function DeveloperConsoleListener() {
 
       // Smoothly navigate to the secret page
       setTimeout(() => {
-        router.push('/developers');
+        router.push(DEV_CHAMBER_PATH);
         setTimeout(() => {
           setShowToast(false);
           isRedirectingRef.current = false;

@@ -20,10 +20,17 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Hidden easter-egg path (keep it obscure — do not link anywhere)
       {
         source: '/secret',
-        destination: '/developers',
+        destination: '/login/developer',
         permanent: false,
+      },
+      // Old /developers route — redirect to home so it appears to not exist
+      {
+        source: '/developers',
+        destination: '/',
+        permanent: true,
       },
     ];
   },
