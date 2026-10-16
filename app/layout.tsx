@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
   // Google Search Console verification — add your token here after verifying
   verification: {
-    google: '<UmPFyWPlpWtuzUqNLgG3M-PO67F9w-OMHaJq8463s84',
+    google: 'UmPFyWPlpWtuzUqNLgG3M-PO67F9w-OMHaJq8463s84',
   },
 
   // Robots directives

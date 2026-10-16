@@ -11,7 +11,7 @@ import Projects3DShowcase from '@/components/Projects3DShowcase';
 import { getEvents, getFacultyAdvisor } from '@/lib/firestore';
 import { INITIAL_ADVISOR } from '@/lib/seedData';
 import { EventItem, FacultyAdvisorData } from '@/lib/types';
-<meta name="google-site-verification" content="UmPFyWPlpWtuzUqNLgG3M-PO67F9w-OMHaJq8463s84" />
+
 export default function HomePage() {
   const [animationLoaded, setAnimationLoaded] = useState(false);
   const [dataReady, setDataReady] = useState(false);
