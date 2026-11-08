@@ -1,7 +1,9 @@
 'use client';
 
+import { authHeaders } from '@/lib/authHeaders';
 import React, { useState, useRef } from 'react';
 import JSZip from 'jszip';
+import Icon from '@/components/ui/Icon';
 import { createGalleryPhoto } from '@/lib/firestore';
 import { GalleryPhoto } from '@/lib/types';
 
@@ -230,6 +232,7 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
 
           const res = await fetch('/api/upload', {
             method: 'POST',
+            headers: await authHeaders(),
             body: formData,
           });
 
@@ -269,7 +272,7 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
 
       setStatus('completed');
       if (uploadedList.length > 0) {
-        showToast(`🎉 Successfully uploaded ${uploadedList.length} photos to the Chapter Gallery!`);
+        showToast(`Successfully uploaded ${uploadedList.length} photos to the Chapter Gallery!`);
       }
     } catch (err: any) {
       console.error('Error processing zip:', err);
@@ -305,19 +308,20 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
   };
 
   return (
-    <div className="zip-gallery-uploader admin-subcard" style={{ marginBottom: '36px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-        <div>
-          <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>📦</span> Bulk ZIP Photo Uploader
-          </h3>
-          <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--dim, #64748b)' }}>
-            Upload a .zip file containing event photos. They will be automatically extracted, uploaded to Cloudinary, and added to the gallery.
-          </p>
+    <div className="zip-gallery-uploader admin-subcard" style={{ marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="icon-tile"><Icon name="archive" size={20} /></div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '16px' }}>Bulk ZIP Photo Upload</h3>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--muted, #64748b)' }}>
+              Upload a .zip of event photos. Images are extracted, uploaded and added to the gallery automatically.
+            </p>
+          </div>
         </div>
         {status === 'completed' && (
-          <button type="button" onClick={resetUploader} className="btn secondary" style={{ fontSize: '12px' }}>
-            + Upload Another ZIP
+          <button type="button" onClick={resetUploader} className="btn secondary sm">
+            <Icon name="plus" size={14} /> Upload another ZIP
           </button>
         )}
       </div>
@@ -351,17 +355,31 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
             textAlign: 'center',
             transition: 'all 0.2s ease',
           }}
+          role="button"
+          tabIndex={0}
+          aria-label="Choose or drop a ZIP archive of photos"
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>🗜️</div>
+          <div
+            className="icon-tile lg"
+            style={{ margin: '0 auto 10px', transform: isDragging ? 'translateY(-4px) scale(1.08)' : undefined }}
+          >
+            <Icon name="upload" size={22} />
+          </div>
           <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink, #1e293b)' }}>
-            Click to choose a .ZIP archive or drag & drop here
+            {isDragging ? 'Drop the archive to start' : 'Choose a .zip archive or drag and drop it here'}
           </span>
           <small style={{ color: 'var(--muted, #94a3b8)', marginTop: '4px' }}>
-            Supports ZIP files containing JPG, JPEG, PNG, or WebP images
+            ZIP files containing JPG, PNG or WebP images
           </small>
         </div>
       )}
@@ -390,10 +408,9 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
             <button
               type="button"
               onClick={handleCancel}
-              className="btn secondary"
-              style={{ fontSize: '12px', padding: '4px 12px', color: '#dc2626' }}
+              className="btn ghost-danger sm"
             >
-              Stop / Pause
+              <Icon name="x" size={14} /> Stop
             </button>
           </div>
 
@@ -450,7 +467,7 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
                     <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.caption}
                     </span>
-                    <span style={{ color: '#16a34a' }}>✓</span>
+                    <Icon name="check" size={12} style={{ color: '#16a34a' }} />
                   </div>
                 ))}
               </div>
@@ -463,10 +480,10 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
       {status === 'completed' && (
         <div style={{ padding: '24px', background: 'rgba(22, 163, 74, 0.06)', borderRadius: '12px', border: '1px solid rgba(22, 163, 74, 0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '24px' }}>🎉</span>
+            <div className="icon-tile green"><Icon name="checkCircle" size={20} /></div>
             <div>
               <h4 style={{ margin: 0, fontSize: '16px', color: '#15803d' }}>
-                ZIP Upload Complete!
+                Upload complete
               </h4>
               <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--ink, #1e293b)' }}>
                 Successfully uploaded <strong>{uploadedItems.length}</strong> photo{uploadedItems.length === 1 ? '' : 's'} from &quot;{zipFileName}&quot;.
@@ -476,7 +493,10 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
 
           {failedItems.length > 0 && (
             <div style={{ marginTop: '12px', padding: '10px', background: 'rgba(220, 38, 38, 0.08)', borderRadius: '8px', fontSize: '12px', color: '#b91c1c' }}>
-              ⚠️ {failedItems.length} photo{failedItems.length === 1 ? '' : 's'} could not be uploaded:
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                <Icon name="alert" size={14} />
+                {failedItems.length} photo{failedItems.length === 1 ? '' : 's'} could not be uploaded:
+              </span>
               <ul style={{ margin: '4px 0 0', paddingLeft: '20px' }}>
                 {failedItems.map((f, i) => (
                   <li key={i}>{f.name}: {f.error}</li>
@@ -492,11 +512,11 @@ export default function ZipGalleryUploader({ onPhotoAdded, showToast }: ZipGalle
         <div style={{ padding: '16px', background: 'rgba(220, 38, 38, 0.08)', borderRadius: '10px', border: '1px solid rgba(220, 38, 38, 0.2)', marginTop: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b91c1c', fontSize: '13px', fontWeight: 600 }}>
-              <span>⚠️</span>
+              <Icon name="alert" size={16} />
               <span>{errorMessage || 'Failed to process ZIP file.'}</span>
             </div>
-            <button type="button" onClick={resetUploader} className="btn secondary" style={{ fontSize: '11px', padding: '4px 10px' }}>
-              Try Again
+            <button type="button" onClick={resetUploader} className="btn secondary sm">
+              <Icon name="replace" size={14} /> Try again
             </button>
           </div>
         </div>

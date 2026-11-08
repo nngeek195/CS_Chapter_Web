@@ -1,65 +1,192 @@
 rules_version = '2';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Roles
+//   Admin        → a document exists at admins/{uid}  (create it in the console)
+//   Board member → a document exists at member_access/{lowercase email}
+//                  holding { permissions: [...] }. The app keeps this in sync
+//                  with board_members automatically.
+// Permission keys: events, leadership, gallery, resources, messages, board, volunteers
+// ─────────────────────────────────────────────────────────────────────────────
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isAuthenticated() {
+    // ── Helper functions ──────────────────────────────────────────
+    function signedIn() {
       return request.auth != null;
     }
 
-    // Site settings (Spotlight, Faculty Advisor)
-    match /site_settings/{settingId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // Event Categories
-    match /event_categories/{categoryId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    function myEmail() {
+      return request.auth.token.email.lower();
     }
 
-    // Events Archive
-    match /events/{eventId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    function accessDoc() {
+      return /databases/$(database)/documents/member_access/$(myEmail());
     }
 
-    // Active Executive Committee
-    match /leadership/{memberId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+    // Admins can do everything; board members only what they were granted.
+    function hasPerm(p) {
+      return isAdmin()
+        || (signedIn()
+            && request.auth.token.email != null
+            && exists(accessDoc())
+            && p in get(accessDoc()).data.permissions);
     }
 
-    // Past Committees (Alumni Contributions)
-    match /past_committees/{committeeId} {
+    // ── Public content (anyone can read) ──────────────────────────
+    match /events/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if hasPerm('events');
     }
 
-    // Curated Resources
-    match /resources/{resourceId} {
+    match /event_categories/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if hasPerm('events');
     }
 
-    // Photo Gallery
-    match /gallery/{photoId} {
+    match /leadership/{docId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if hasPerm('leadership');
     }
 
-    // Contact Messages sent by visitors
+    match /past_committees/{docId} {
+      allow read: if true;
+      allow write: if hasPerm('leadership');
+    }
+
+    match /gallery/{docId} {
+      allow read: if true;
+      allow write: if hasPerm('gallery');
+    }
+
+    match /resources/{docId} {
+      allow read: if true;
+      allow write: if hasPerm('resources');
+    }
+
+    // Faculty advisor etc. — admins only
+    match /site_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Contact messages ──────────────────────────────────────────
+    // Anyone can submit; only admins / members with 'messages' can manage
     match /contact_messages/{messageId} {
       allow create: if true;
-      allow read, update, delete: if isAuthenticated();
+      allow read, update, delete: if hasPerm('messages');
     }
 
-    // Default fallback for any other collections
+    // ── Board members ─────────────────────────────────────────────
+    match /board_members/{memberId} {
+      // Signed-in users must be able to list this collection: the portal
+      // finds and live-follows the member's own record by email.
+      allow read: if signedIn();
+
+      // Admins: anything. Members with 'board': anyone except themselves
+      // (prevents self-escalation and self-lockout).
+      allow create: if isAdmin()
+        || (hasPerm('board') && request.resource.data.email.lower() != myEmail());
+
+      allow delete: if isAdmin()
+        || (hasPerm('board') && resource.data.email.lower() != myEmail());
+
+      allow update: if isAdmin()
+        || (hasPerm('board')
+            && resource.data.email.lower() != myEmail()
+            && request.resource.data.email.lower() != myEmail())
+        // A member may activate their own account after the first-login
+        // password change — and touch nothing else (e.g. not permissions).
+        || (signedIn()
+            && resource.data.email.lower() == myEmail()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['mustChangePassword', 'status', 'activatedAt', 'updatedAt'])
+            && request.resource.data.mustChangePassword == false
+            && request.resource.data.status == 'active');
+    }
+
+    // Permission mirror used by hasPerm() above
+    match /member_access/{email} {
+      allow read: if isAdmin() || (signedIn() && email == myEmail());
+      allow write: if isAdmin() || (hasPerm('board') && email != myEmail());
+    }
+
+    // ── Volunteer calls (recruitment forms) ───────────────────────
+    // Owner = the uid in createdBy. Admins manage every call; members with
+    // the 'volunteers' permission manage only the calls they created.
+    function ownsCall(data) {
+      return isAdmin()
+        || (hasPerm('volunteers') && data.createdBy == request.auth.uid);
+    }
+
+    match /volunteer_calls/{callId} {
+      allow read: if resource.data.published == true || ownsCall(resource.data);
+      allow create: if hasPerm('volunteers')
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if ownsCall(resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if ownsCall(resource.data);
+    }
+
+    // ── Volunteer applications ────────────────────────────────────
+    // Anyone may apply (no login) while a call is open. The document id is
+    // "{callId}__{lowercase email}", so the same email can apply only once
+    // (a second write would be an update, which the public cannot do).
+    // Only the call's owner (callOwner) or an admin can read / review / delete.
+    function ownsApplication(data) {
+      return isAdmin()
+        || (hasPerm('volunteers') && data.callOwner == request.auth.uid);
+    }
+
+    function validApplication(appId) {
+      let d = request.resource.data;
+      let call = get(/databases/$(database)/documents/volunteer_calls/$(d.callId)).data;
+      return d.keys().hasOnly(['callId', 'callOwner', 'name', 'email', 'phone', 'studentId',
+                               'faculty', 'academicYear', 'positions', 'preferredRole',
+                               'answers', 'status', 'createdAt'])
+        && d.keys().hasAll(['callId', 'callOwner', 'name', 'email', 'positions', 'answers', 'status', 'createdAt'])
+        && (d.callId is string)
+        && (d.email is string)
+        && d.email.size() <= 200
+        && d.email.matches('^[^@\\s]+@[^@\\s]+[.][^@\\s]+$')
+        && appId == d.callId + '__' + d.email.lower()
+        && (d.name is string) && d.name.size() > 0 && d.name.size() <= 120
+        && (d.get('phone', '') is string) && d.get('phone', '').size() <= 40
+        && (d.get('studentId', '') is string) && d.get('studentId', '').size() <= 60
+        && (d.positions is list) && d.positions.size() >= 1 && d.positions.size() <= 5
+        && (d.answers is map) && d.answers.size() <= 40
+        && d.status == 'pending'
+        && (d.createdAt is number)
+        && call.status == 'open'
+        && call.published == true
+        && d.callOwner == call.createdBy
+        && (call.get('deadlineAt', null) == null || request.time.toMillis() <= call.deadlineAt);
+    }
+
+    match /volunteer_applications/{appId} {
+      allow create: if validApplication(appId);
+      allow read, delete: if ownsApplication(resource.data);
+      // Reviewers may only change review fields — never who owns it or what was submitted.
+      allow update: if ownsApplication(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'assignedPosition', 'assignedRole', 'notes', 'reviewedAt', 'reviewedBy']);
+    }
+
+    // ── Admin registry — managed only from the Firebase console ───
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ── Deny everything else by default ───────────────────────────
     match /{document=**} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if false;
     }
   }
 }

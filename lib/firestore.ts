@@ -10,6 +10,9 @@ import {
   query,
   orderBy,
   writeBatch,
+  onSnapshot,
+  deleteField,
+  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import {
@@ -184,7 +187,7 @@ export async function endCurrentYearCommittee(
       return { success: false, message: 'No current committee members to archive.', archivedCount: 0 };
     }
 
-    // Format member names and roles as strings: e.g. "President: Naveen Fernando"
+    // Format member names and roles as strings: e.g. "Webmaster: Niranga Nayanajith"
     const memberStrings = currentMembers.map((m) => `${m.role}: ${m.name}`);
 
     // Create entry in past_committees
@@ -336,3 +339,282 @@ export async function deleteContactMessage(id: string): Promise<void> {
   await deleteDoc(doc(db, 'contact_messages', id));
 }
 
+// ==========================================
+// BOARD MEMBERS (Admin Users)
+// ==========================================
+
+export interface BoardMember {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  permissions: string[];
+  status: 'pending' | 'active';
+  mustChangePassword: boolean;
+  invitedAt: number;
+  activatedAt?: number;
+  updatedAt?: number;
+}
+
+export async function getBoardMembers(): Promise<BoardMember[]> {
+  try {
+    const snap = await getDocs(collection(db, 'board_members'));
+    if (!snap.empty) {
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() } as BoardMember));
+      return items.sort((a, b) => (b.invitedAt || 0) - (a.invitedAt || 0));
+    }
+  } catch (err) {
+    console.warn('Firestore board_members fetch fallback:', err);
+  }
+  return [];
+}
+
+// `member_access/{lowercase email}` mirrors each board member's permissions.
+// Firestore security rules use it to check what a signed-in member may write
+// (rules can look documents up by id, but cannot search board_members by email).
+const accessKey = (email: string) => email.trim().toLowerCase();
+const accessRef = (email: string) => doc(db, 'member_access', accessKey(email));
+
+export async function createBoardMember(
+  member: Omit<BoardMember, 'id'>
+): Promise<BoardMember> {
+  const ref = doc(collection(db, 'board_members'));
+  const batch = writeBatch(db);
+  batch.set(ref, { ...member, updatedAt: Date.now() });
+  batch.set(accessRef(member.email), { permissions: member.permissions || [], memberId: ref.id });
+  await batch.commit();
+  return { id: ref.id, ...member };
+}
+
+export async function updateBoardMember(
+  id: string,
+  data: Partial<BoardMember>
+): Promise<void> {
+  const ref = doc(db, 'board_members', id);
+  // Firestore rejects `undefined`, so treat it as "remove this field"; stamp
+  // updatedAt so the most recently edited record wins if duplicates exist.
+  const clean = Object.fromEntries(
+    Object.entries(data)
+      .filter(([k]) => k !== 'id')
+      .map(([k, v]) => [k, v === undefined ? deleteField() : v])
+  );
+  const batch = writeBatch(db);
+  batch.update(ref, { ...clean, updatedAt: Date.now() });
+
+  // Keep the permission mirror in step when permissions or the email change.
+  if (data.permissions !== undefined || data.email !== undefined) {
+    const current = await getDoc(ref);
+    const prev = current.exists() ? (current.data() as BoardMember) : null;
+    const email = data.email ?? prev?.email;
+    const permissions = data.permissions ?? prev?.permissions ?? [];
+    if (prev?.email && email && accessKey(prev.email) !== accessKey(email)) {
+      batch.delete(accessRef(prev.email)); // post replaced — old holder loses access
+    }
+    if (email) batch.set(accessRef(email), { permissions, memberId: id });
+  }
+  await batch.commit();
+}
+
+export async function deleteBoardMember(id: string): Promise<void> {
+  const ref = doc(db, 'board_members', id);
+  const current = await getDoc(ref);
+  const batch = writeBatch(db);
+  batch.delete(ref);
+  const email = current.exists() ? (current.data() as BoardMember).email : '';
+  if (email) batch.delete(accessRef(email));
+  await batch.commit();
+}
+
+/**
+ * Rebuilds member_access from board_members. Run by the admin dashboard on
+ * load so members invited before the mirror existed keep working.
+ */
+export async function syncMemberAccess(): Promise<void> {
+  const [members, access] = await Promise.all([
+    getDocs(collection(db, 'board_members')),
+    getDocs(collection(db, 'member_access')),
+  ]);
+  const wanted = new Map<string, { permissions: string[]; memberId: string; stamp: number }>();
+  members.docs.forEach((d) => {
+    const m = d.data() as BoardMember;
+    if (!m.email) return;
+    const key = accessKey(m.email);
+    const stamp = Math.max(m.updatedAt || 0, m.activatedAt || 0, m.invitedAt || 0);
+    const existing = wanted.get(key);
+    if (!existing || stamp >= existing.stamp) wanted.set(key, { permissions: m.permissions || [], memberId: d.id, stamp });
+  });
+  const have = new Map(access.docs.map((d) => [d.id, d.data()]));
+  const batch = writeBatch(db);
+  let changes = 0;
+  wanted.forEach(({ permissions, memberId }, key) => {
+    const cur = have.get(key);
+    if (!cur || cur.memberId !== memberId || JSON.stringify(cur.permissions) !== JSON.stringify(permissions)) {
+      batch.set(doc(db, 'member_access', key), { permissions, memberId });
+      changes++;
+    }
+  });
+  have.forEach((_, key) => {
+    if (!wanted.has(key)) { batch.delete(doc(db, 'member_access', key)); changes++; }
+  });
+  if (changes > 0) await batch.commit();
+}
+
+/**
+ * True if `admins/{uid}` exists. Returns null when the read is denied —
+ * i.e. the new security rules have not been deployed yet.
+ */
+export async function isAdminUid(uid: string): Promise<boolean | null> {
+  try {
+    const snap = await getDoc(doc(db, 'admins', uid));
+    return snap.exists();
+  } catch (err) {
+    console.warn('Admin check failed (are the new Firestore rules deployed?):', err);
+    return null;
+  }
+}
+
+const sameEmail = (a: unknown, b: string) =>
+  typeof a === 'string' && a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * Picks the board-member record for an email. If several records share the
+ * email (e.g. invited twice), the most recently edited / invited one wins —
+ * that is the one the admin is looking at when they change permissions.
+ */
+function pickBoardMember(
+  docs: Array<{ id: string; data: () => Record<string, unknown> }>,
+  email: string
+): BoardMember | null {
+  const matches = docs
+    .filter((d) => sameEmail(d.data().email, email))
+    .map((d) => ({ ...d.data(), id: d.id } as BoardMember));
+  if (matches.length === 0) return null;
+  if (matches.length > 1) {
+    console.warn(`Found ${matches.length} board_members records for ${email}; using the most recently updated one.`);
+  }
+  const stamp = (m: BoardMember) => Math.max(m.updatedAt || 0, m.activatedAt || 0, m.invitedAt || 0);
+  return matches.sort((a, b) => stamp(b) - stamp(a))[0];
+}
+
+export async function getBoardMemberByEmail(email: string): Promise<BoardMember | null> {
+  if (!email) return null;
+  try {
+    const snap = await getDocs(collection(db, 'board_members'));
+    const found = pickBoardMember(snap.docs, email);
+    if (found) return found;
+  } catch (err) {
+    console.warn('Firestore board member by email fetch:', err);
+  }
+  return null;
+}
+
+export async function markPasswordChanged(email: string): Promise<void> {
+  try {
+    const snap = await getDocs(collection(db, 'board_members'));
+    const found = snap.docs.find((d) => sameEmail(d.data().email, email));
+    if (found) {
+      await updateDoc(found.ref, {
+        mustChangePassword: false,
+        status: 'active',
+        activatedAt: Date.now(),
+      });
+    }
+  } catch (err) {
+    console.warn('markPasswordChanged error:', err);
+  }
+}
+
+
+// ==========================================
+// REAL-TIME SUBSCRIPTIONS
+// ==========================================
+
+/**
+ * Live-subscribes to a whole collection. The callback fires immediately with
+ * the current data and again on every change (including local writes), so
+ * screens using this stay in sync with edits made elsewhere (e.g. the admin).
+ */
+export function subscribeToCollection<T extends { id: string }>(
+  name: string,
+  onData: (items: T[]) => void,
+  onError?: (err: Error) => void,
+  sort?: (a: T, b: T) => number
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, name),
+    (snap) => {
+      const items = snap.docs.map((d) => ({ ...d.data(), id: d.id } as T));
+      onData(sort ? items.sort(sort) : items);
+    },
+    (err) => {
+      console.warn(`Firestore ${name} subscription error:`, err);
+      onError?.(err);
+    }
+  );
+}
+
+/**
+ * Live-subscribes to the board-member record for an email (case-insensitive).
+ * Follows the email rather than a document id so permission changes are picked
+ * up even if the admin edits a different / newer record for the same person.
+ * `null` means no record exists any more (access revoked).
+ */
+export function subscribeToBoardMemberByEmail(
+  email: string,
+  onData: (member: BoardMember | null) => void
+): Unsubscribe {
+  return onSnapshot(
+    collection(db, 'board_members'),
+    (snap) => {
+      // Ignore cache-only snapshots so a stale/empty cache never revokes access.
+      if (snap.metadata.fromCache) return;
+      onData(pickBoardMember(snap.docs, email));
+    },
+    (err) => console.warn('Firestore board member subscription error:', err)
+  );
+}
+
+/**
+ * Turns a Firestore "Missing or insufficient permissions" error into a message
+ * that says which part of the role setup is missing for the signed-in user.
+ */
+export async function explainPermissionError(
+  err: unknown,
+  user: { uid: string; email: string | null } | null
+): Promise<string> {
+  const base = err instanceof Error ? err.message : String(err);
+  const code = (err as { code?: string })?.code;
+  if (!user || (code !== 'permission-denied' && !/insufficient permissions/i.test(base))) return base;
+
+  const email = (user.email || '').trim().toLowerCase();
+  const tryGet = async (path: string) => {
+    try {
+      const snap = await getDoc(doc(db, path));
+      return snap.exists() ? 'exists' : 'missing';
+    } catch {
+      return 'denied';
+    }
+  };
+
+  const adminDoc = await tryGet(`admins/${user.uid}`);
+  if (adminDoc === 'denied') {
+    return `${base} — the published Firestore rules have no "admins" section. Publish the full rules from firestore.rules (replace everything).`;
+  }
+  const accessDoc = email ? await tryGet(`member_access/${email}`) : 'missing';
+  if (adminDoc === 'exists') {
+    if (accessDoc === 'denied') {
+      return `${base} — the published Firestore rules have no "member_access" section. Publish the full rules from firestore.rules (replace everything).`;
+    }
+    return `${base} — you are an admin, so this should be allowed. Make sure the full rules from firestore.rules are published and reload the page.`;
+  }
+  if (accessDoc === 'denied') {
+    return `${base} — the published Firestore rules have no "member_access" section. Publish the full rules from firestore.rules (replace everything).`;
+  }
+  if (accessDoc === 'missing') {
+    const isMember = (await getBoardMemberByEmail(email)) !== null;
+    return isMember
+      ? `${base} — your access record (member_access/${email}) has not been created yet. An admin must open the /admin page once to sync it.`
+      : `${base} — this account (${user.email}) is not registered as an admin. Create a Firestore document at admins/${user.uid}.`;
+  }
+  return `${base} — your board permissions do not include this action. Ask an admin to grant it.`;
+}

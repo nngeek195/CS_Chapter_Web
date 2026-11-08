@@ -4,12 +4,14 @@ import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import Icon from '@/components/ui/Icon';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,8 +22,30 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      const destination = searchParams.get('from') || '/admin';
+      // login() now returns { user, boardMember } and sets the role cookie
+      // immediately so middleware can enforce the correct route.
+      const { boardMember } = await login(email.trim(), password);
+
+      // ── Determine where to redirect ──────────────────────────────
+      // Board/committee member → /member (their own limited dashboard).
+      // Full admin → /admin (or honour the `from` query param).
+      let destination: string;
+
+      if (boardMember) {
+        // This is a board/committee member — always send to /member portal
+        // They should NEVER access /admin regardless of any `from` param
+        destination = '/member';
+      } else {
+        // This is a full admin — send to /admin or honour the `from` param
+        const fromParam = searchParams.get('from');
+        if (fromParam && !fromParam.startsWith('/member')) {
+          // Admin can go wherever they wanted (but not /member which is for board members)
+          destination = fromParam;
+        } else {
+          destination = '/admin';
+        }
+      }
+
       router.push(destination);
       router.refresh();
     } catch (err: any) {
@@ -52,28 +76,29 @@ function LoginForm() {
           />
         </Link>
         <div className="eyebrow mono" style={{ justifyContent: 'center', marginBottom: '8px' }}>
-          ADMINISTRATION
+          CHAPTER PORTAL
         </div>
-        <h2>Chapter Portal</h2>
+        <h2>Sign In</h2>
         <p style={{ marginTop: '8px', fontSize: '14px' }}>
-          Sign in with your authorized chapter credentials to manage content and records.
+          Use your chapter account to manage the website.
         </p>
       </div>
 
       {error && (
         <div className="login-error-alert" role="alert">
-          <span>⚠️ {error}</span>
+          <Icon name="alert" size={16} style={{ marginTop: '2px' }} />
+          <span>{error}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
-          <label htmlFor="email">Admin Email</label>
+          <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
             required
-            placeholder="admin@ieeecs-susl.ac.lk"
+            placeholder="your-email@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -82,15 +107,26 @@ function LoginForm() {
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            required
-            placeholder="••••••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              style={{ paddingRight: '44px' }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: '6px', display: 'grid', placeItems: 'center' }}
+            >
+              <Icon name={showPassword ? 'eyeOff' : 'eye'} size={17} />
+            </button>
+          </div>
         </div>
 
         <button
@@ -99,13 +135,14 @@ function LoginForm() {
           disabled={loading}
           style={{ width: '100%', marginTop: '10px', justifyContent: 'center' }}
         >
-          {loading ? 'Authenticating...' : 'Sign In to Dashboard →'}
+          {loading ? <span className="spinner" aria-hidden="true" /> : <Icon name="lock" size={15} />}
+          {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 
       <div className="login-foot">
         <Link href="/" className="link-arrow" style={{ fontSize: '13px' }}>
-          ← Return to public website
+          <Icon name="arrowLeft" size={14} /> Back to the website
         </Link>
       </div>
     </div>
@@ -123,4 +160,3 @@ export default function LoginPage() {
     </section>
   );
 }
-

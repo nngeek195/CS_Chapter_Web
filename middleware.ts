@@ -4,19 +4,40 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('ieeecs_auth_token')?.value;
+  const role = request.cookies.get('ieeecs_user_role')?.value; // 'admin' | 'member' | undefined
 
-  // Protect all /admin routes
+  // Protect all /admin routes — must be authenticated AND must be an admin (not a board member)
   if (pathname.startsWith('/admin')) {
     if (!token) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(loginUrl);
     }
+    // If a board member tries to access /admin, redirect them to /member
+    if (role === 'member') {
+      return NextResponse.redirect(new URL('/member', request.url));
+    }
   }
 
-  // If already authenticated and accessing login page, redirect to /admin
+  // Protect all /member routes — must be authenticated
+  if (pathname.startsWith('/member')) {
+    if (!token) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    // If a full admin tries to access /member, redirect them to /admin
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+  }
+
+  // If already authenticated and accessing login page, redirect based on role
   if (pathname === '/login') {
     if (token) {
+      if (role === 'member') {
+        return NextResponse.redirect(new URL('/member', request.url));
+      }
       return NextResponse.redirect(new URL('/admin', request.url));
     }
   }
@@ -41,5 +62,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/login', '/login/developer'],
+  matcher: ['/admin/:path*', '/member/:path*', '/login', '/login/developer'],
 };

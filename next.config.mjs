@@ -53,7 +53,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' blob: data: https://images.unsplash.com https://firebasestorage.googleapis.com https://res.cloudinary.com https://www.google-analytics.com",
-              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com",
+              "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://api.resend.com",
               // Allow srcdoc iframes and OpenStreetMap embed
               "frame-src 'self' blob: data: https://www.openstreetmap.org",
               "worker-src 'self' blob:",

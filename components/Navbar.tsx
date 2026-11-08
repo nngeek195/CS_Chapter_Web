@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Logo from '../images/logo.png';
 import { getResources } from '@/lib/firestore';
+import { countOpenCalls } from '@/lib/volunteers';
+import Icon from '@/components/ui/Icon';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasResources, setHasResources] = useState(false);
+  const [hasOpenCalls, setHasOpenCalls] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -37,8 +40,15 @@ export default function Navbar() {
       .catch(() => setHasResources(false));
   }, []);
 
-  // Do not show the common header on the admin dashboard
-  if (pathname?.startsWith('/admin')) {
+  // Show the Volunteer link only while at least one call is accepting applications
+  useEffect(() => {
+    countOpenCalls()
+      .then((n) => setHasOpenCalls(n > 0))
+      .catch(() => setHasOpenCalls(false));
+  }, []);
+
+  // Do not show the public site header on the admin / member dashboards
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/member')) {
     return null;
   }
 
@@ -46,6 +56,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Events', href: '/events' },
+    ...(hasOpenCalls ? [{ name: 'Volunteer', href: '/volunteer' }] : []),
     { name: 'Leadership', href: '/leadership' },
     ...(hasResources ? [{ name: 'Resources', href: '/resources' }] : []),
     { name: 'Membership', href: '/membership' },
@@ -87,7 +98,7 @@ export default function Navbar() {
               aria-label="Open menu"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? '✕' : '☰'}
+              <Icon name={mobileMenuOpen ? 'x' : 'list'} size={20} />
             </button>
           </div>
         </div>

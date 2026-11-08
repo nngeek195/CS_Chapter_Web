@@ -20,7 +20,7 @@ export default function Footer() {
   }, []);
 
   
-  if (pathname?.startsWith('/admin')) {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/member')) {
     return (
       <footer style={{ borderTop: '1px solid var(--line)', padding: '20px 0', textAlign: 'center', fontSize: '13px', color: 'var(--muted)', background: 'var(--paper)' }}>
         <div className="container">
