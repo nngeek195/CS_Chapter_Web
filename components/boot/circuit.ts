@@ -213,14 +213,14 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
 
   // Substrate
   const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.hypot(w, h) / 1.6);
-  bgGrad.addColorStop(0, '#0a1f2e');
-  bgGrad.addColorStop(0.55, '#06121c');
-  bgGrad.addColorStop(1, '#02070b');
+  bgGrad.addColorStop(0, '#103049');
+  bgGrad.addColorStop(0.55, '#0a1d2c');
+  bgGrad.addColorStop(1, '#040d15');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, w, h);
 
   // Fine dot grid
-  ctx.fillStyle = 'rgba(120, 180, 220, 0.05)';
+  ctx.fillStyle = 'rgba(150, 205, 245, 0.09)';
   for (let y = 0; y < h; y += g) for (let x = 0; x < w; x += g) ctx.fillRect(x - 0.5, y - 0.5, 1, 1);
 
   const path = (t: Trace) => {
@@ -234,10 +234,10 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
   // Trace glow + copper
   for (const t of b.traces) {
     path(t);
-    ctx.strokeStyle = t.fan ? 'rgba(40, 140, 200, 0.07)' : 'rgba(40, 140, 200, 0.04)';
+    ctx.strokeStyle = t.fan ? 'rgba(80, 180, 255, 0.14)' : 'rgba(80, 180, 255, 0.08)';
     ctx.lineWidth = 5;
     ctx.stroke();
-    ctx.strokeStyle = t.fan ? 'rgba(70, 160, 215, 0.34)' : 'rgba(70, 150, 200, 0.2)';
+    ctx.strokeStyle = t.fan ? 'rgba(110, 200, 255, 0.55)' : 'rgba(110, 190, 245, 0.34)';
     ctx.lineWidth = t.fan ? 1.6 : 1.3;
     ctx.stroke();
   }
@@ -249,20 +249,20 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
     ctx.arc(end.x, end.y, 3.2, 0, Math.PI * 2);
     ctx.fillStyle = '#06121c';
     ctx.fill();
-    ctx.strokeStyle = t.fan ? 'rgba(90, 175, 225, 0.5)' : 'rgba(90, 165, 210, 0.3)';
+    ctx.strokeStyle = t.fan ? 'rgba(130, 210, 255, 0.75)' : 'rgba(130, 200, 250, 0.48)';
     ctx.lineWidth = 1.2;
     ctx.stroke();
     if (!t.fan) {
       const st = t.pts[0];
       ctx.beginPath();
       ctx.arc(st.x, st.y, 2.2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(90, 165, 210, 0.25)';
+      ctx.fillStyle = 'rgba(130, 200, 250, 0.4)';
       ctx.fill();
     }
   }
 
   // Chip pin pads
-  ctx.fillStyle = 'rgba(150, 200, 230, 0.35)';
+  ctx.fillStyle = 'rgba(180, 225, 255, 0.55)';
   for (const [a, bpt] of b.stubs) {
     const horizontal = a.y === bpt.y;
     if (horizontal) ctx.fillRect(Math.min(a.x, bpt.x + (a.x < bpt.x ? -6 : 0)), a.y - 1.5, 6, 3);
@@ -272,19 +272,19 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
   // Decorative ICs
   for (const ic of b.ics) {
     ctx.fillStyle = 'rgba(4, 12, 18, 0.95)';
-    ctx.strokeStyle = 'rgba(90, 160, 205, 0.28)';
+    ctx.strokeStyle = 'rgba(130, 200, 250, 0.45)';
     ctx.lineWidth = 1;
     roundRect(ctx, ic.x + 0.5, ic.y + 0.5, ic.w, ic.h, 3);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = 'rgba(140, 190, 225, 0.25)';
+    ctx.fillStyle = 'rgba(170, 215, 250, 0.4)';
     for (let y = ic.y + g / 2; y < ic.y + ic.h; y += g / 2) {
       ctx.fillRect(ic.x - 4, y - 1, 4, 2);
       ctx.fillRect(ic.x + ic.w + 1, y - 1, 4, 2);
     }
     ctx.beginPath();
     ctx.arc(ic.x + 6, ic.y + 6, 1.8, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(140, 190, 225, 0.3)';
+    ctx.fillStyle = 'rgba(170, 215, 250, 0.48)';
     ctx.fill();
   }
 
@@ -292,7 +292,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
   for (const s of b.smds) {
     const [pw, ph] = s.vertical ? [5, 4] : [4, 5];
     const dx = s.vertical ? 0 : g, dy = s.vertical ? g : 0;
-    ctx.fillStyle = 'rgba(150, 195, 225, 0.22)';
+    ctx.fillStyle = 'rgba(180, 220, 250, 0.36)';
     ctx.fillRect(s.x - pw / 2, s.y - ph / 2, pw, ph);
     ctx.fillRect(s.x + dx - pw / 2, s.y + dy - ph / 2, pw, ph);
     ctx.fillStyle = 'rgba(20, 40, 55, 0.9)';
@@ -302,7 +302,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, b: Board) {
 
   // Silkscreen
   ctx.font = '600 8px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
-  ctx.fillStyle = 'rgba(170, 205, 230, 0.16)';
+  ctx.fillStyle = 'rgba(190, 225, 250, 0.28)';
   for (const l of b.labels) ctx.fillText(l.text, l.x, l.y);
 }
 
@@ -406,7 +406,7 @@ export class SparkEngine {
         const p = pointAt(s.t, dist);
         const f = 1 - k / n;
         if (!prev) { prev = p; continue; }
-        ctx.strokeStyle = `rgba(255, 196, 40, ${0.75 * f * f})`;
+        ctx.strokeStyle = `rgba(255, 222, 90, ${0.9 * f * f})`;
         ctx.lineWidth = 0.8 + 1.8 * f;
         ctx.beginPath();
         ctx.moveTo(prev.x, prev.y);
@@ -420,9 +420,9 @@ export class SparkEngine {
         const p = pointAt(s.t, head);
         const r = 9;
         const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        grad.addColorStop(0, 'rgba(255, 250, 215, 1)');
-        grad.addColorStop(0.25, 'rgba(255, 214, 70, 0.85)');
-        grad.addColorStop(1, 'rgba(255, 170, 0, 0)');
+        grad.addColorStop(0, 'rgba(255, 253, 235, 1)');
+        grad.addColorStop(0.25, 'rgba(255, 232, 120, 0.95)');
+        grad.addColorStop(1, 'rgba(255, 200, 50, 0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
@@ -445,8 +445,8 @@ export class SparkEngine {
       const big = f.max > 0.5;
       const r = (big ? 40 : 4) + (big ? 260 : 14) * k;
       const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
-      grad.addColorStop(0, `rgba(255, 225, 120, ${(big ? 0.35 : 0.7) * (1 - k)})`);
-      grad.addColorStop(1, 'rgba(255, 190, 40, 0)');
+      grad.addColorStop(0, `rgba(255, 238, 160, ${(big ? 0.45 : 0.85) * (1 - k)})`);
+      grad.addColorStop(1, 'rgba(255, 215, 80, 0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(f.x, f.y, r, 0, Math.PI * 2);

@@ -140,10 +140,9 @@ export default function LoadingScreen({ isLoaded = false }: LoadingScreenProps) 
         <div className="boot-chip" ref={chipRef}>
           <span className="boot-chip-corner" />
           <div className="boot-logo">
-            {/* White copy of the whole logo for the dark board, with the orange
-                symbol layered back on top in its real colours. */}
-            <img src="/images/logo.png" alt="" className="mono" draggable={false} />
-            <img src="/images/logo.png" alt="IEEE Computer Society — SUSL Student Branch Chapter" className="color" draggable={false} />
+            {/* Vector version of logo.png (white text + orange Φ symbol) so it
+                stays sharp on large / high-DPI screens; ~12 KB gzipped. */}
+            <img src="/images/logo-boot.svg" alt="IEEE Computer Society — SUSL Student Branch Chapter" draggable={false} />
           </div>
           <span className="boot-chip-scan" />
         </div>
