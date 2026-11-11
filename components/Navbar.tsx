@@ -48,7 +48,10 @@ export default function Navbar() {
   }, []);
 
   // Do not show the public site header on the admin / member dashboards
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/member')) {
+  // Match whole path segments so "/membership" isn't mistaken for "/member"
+  const isUnder = (base: string) =>
+    pathname === base || pathname?.startsWith(`${base}/`);
+  if (isUnder('/admin') || isUnder('/member')) {
     return null;
   }
 

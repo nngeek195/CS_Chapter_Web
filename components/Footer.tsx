@@ -20,7 +20,10 @@ export default function Footer() {
   }, []);
 
   
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/member')) {
+  // Match whole path segments so "/membership" isn't mistaken for "/member"
+  const isUnder = (base: string) =>
+    pathname === base || pathname?.startsWith(`${base}/`);
+  if (isUnder('/admin') || isUnder('/member')) {
     return (
       <footer style={{ borderTop: '1px solid var(--line)', padding: '20px 0', textAlign: 'center', fontSize: '13px', color: 'var(--muted)', background: 'var(--paper)' }}>
         <div className="container">

@@ -5,20 +5,6 @@ import TiltCard from '@/components/TiltCard';
 import FaqAccordion from '@/components/FaqAccordion';
 import MagneticButton from '@/components/MagneticButton';
 
-export const metadata: Metadata = {
-  title: 'Membership',
-  description:
-    'Join the IEEE Computer Society Student Branch Chapter at Sabaragamuwa University of Sri Lanka. Learn about membership benefits, how to join, and frequently asked questions.',
-  alternates: {
-    canonical: '/membership',
-  },
-  openGraph: {
-    title: 'Membership | IEEE CS SUSL',
-    description:
-      'Join the IEEE Computer Society at SUSL. Learn about benefits, how to register, and membership FAQ.',
-    url: '/membership',
-  },
-};
 
 export default function MembershipPage() {
   const faqs = [
