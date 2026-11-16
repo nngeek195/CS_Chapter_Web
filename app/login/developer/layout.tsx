@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Secret Developer Chamber',
+  title: 'Meet the Developers',
   robots: {
     index: false,
     follow: false,
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DeveloperChamberLayout({
+export default function DeveloperPageLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -42,9 +42,8 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Guard the hidden developer chamber — only allow access if the
-  // referring session marker is set (i.e. arrived via the console easter-egg).
-  // Direct URL entry gets silently redirected to home.
+  // Guard the developer page — only allow access from within the same site.
+  // Direct URL entry from external sources gets silently redirected to home.
   if (pathname === '/login/developer') {
     const referer = request.headers.get('referer') || '';
     const host = request.nextUrl.host;

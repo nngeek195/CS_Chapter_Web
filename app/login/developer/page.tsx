@@ -63,7 +63,7 @@ export default function DevelopersPage() {
 
   return (
     <>
-      {/* Secret Hero Banner */}
+      {/* Developer Hero Banner */}
       <section className="page-hero" style={{ background: 'linear-gradient(145deg, #040d14 0%, #062b40 50%, #003B5C 100%)' }}>
         <div className="container">
           <div className="eyebrow mono" style={{ color: '#68cdf9', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -77,7 +77,7 @@ export default function DevelopersPage() {
                 boxShadow: '0 0 12px #00e676',
               }}
             />
-            0xDEV · SECRET CHAMBER · EASTER EGG UNLOCKED 🔓
+            0xDEV · DEVELOPER PORTAL 🔧
           </div>
 
           <h1 style={{ maxWidth: '14ch' }}>
@@ -85,7 +85,7 @@ export default function DevelopersPage() {
           </h1>
 
           <p style={{ maxWidth: '70ch' }}>
-            You discovered the developer console! Meet the engineering team behind the official IEEE Computer Society Chapter platform at Sabaragamuwa University of Sri Lanka.
+            You found the developer page! Meet the engineering team behind the official IEEE Computer Society Chapter platform at Sabaragamuwa University of Sri Lanka.
           </p>
 
           {/* Terminal Console Snippet */}
@@ -108,7 +108,7 @@ export default function DevelopersPage() {
               <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }}></span>
               <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }}></span>
               <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#27c93f', display: 'inline-block' }}></span>
-              <span style={{ marginLeft: '12px', fontSize: '11px', letterSpacing: '0.1em' }}>bash ~ ieee-cs-susl/dev-chamber</span>
+              <span style={{ marginLeft: '12px', fontSize: '11px', letterSpacing: '0.1em' }}>bash ~ ieee-cs-susl/developers</span>
             </div>
             <div style={{ lineHeight: 1.8 }}>
               <span style={{ color: '#68cdf9' }}>$</span> <span style={{ color: '#fff' }}>curl -s https://cschaptersusl.org/api/developers</span><br />
